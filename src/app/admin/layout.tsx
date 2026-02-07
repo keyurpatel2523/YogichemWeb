@@ -18,6 +18,7 @@ import {
   X,
   LogOut,
   Boxes,
+  FolderTree,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAdminStore } from '@/lib/admin-store';
@@ -25,6 +26,7 @@ import { useAdminStore } from '@/lib/admin-store';
 const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', href: '/admin' },
   { icon: Package, label: 'Products', href: '/admin/products' },
+  { icon: FolderTree, label: 'Categories', href: '/admin/categories' },
   { icon: Users, label: 'Users', href: '/admin/users' },
   { icon: ShoppingCart, label: 'Orders', href: '/admin/orders' },
   { icon: Tag, label: 'Promotions', href: '/admin/promotions' },

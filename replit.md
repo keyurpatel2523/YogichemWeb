@@ -127,19 +127,21 @@ The seeder creates:
 
 ## Recent Changes
 
+- Rebranded from BootsShop to Yogichem across entire platform
+- Added admin product edit page at /admin/products/[id] with full form
+- Added admin add product page at /admin/products/new
+- Added admin category management at /admin/categories (CRUD + subcategories)
+- Added Categories link to admin sidebar navigation
+- Fixed products list page with admin auth and working delete functionality
+- Product PATCH API now handles image URL updates
+- All admin API routes protected with JWT authentication (requireAdmin middleware)
+- Admin auth: separate JWT flow at /api/admin/auth
+- All admin pages use real database data via React Query
 - Fixed Server Component error (removed onContextMenu from body)
 - Created complete customer storefront
-- Built admin dashboard with 11 management modules
+- Built admin dashboard with 14 management pages
 - Implemented cart, wishlist, compare functionality
-- Added comprehensive API routes:
-  - Products (list, detail)
-  - Categories
-  - Auth (login, register with JWT)
-  - Orders (create, list user orders)
-  - Coupons validation
-  - Admin APIs: orders, products, users, coupons, shipping, stats
 - Checkout properly creates orders in the database
-- JWT auth with proper token verification
 - Database seeded with sample data
 
 ## Color Palette

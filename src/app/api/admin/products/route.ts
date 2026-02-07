@@ -103,7 +103,7 @@ export async function PATCH(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { id, ...updateData } = body;
+    const { id, imageUrl, ...updateData } = body;
 
     if (!id) {
       return NextResponse.json({ error: 'Product ID required' }, { status: 400 });
@@ -116,6 +116,27 @@ export async function PATCH(request: NextRequest) {
       .set(updateData)
       .where(eq(products.id, id))
       .returning();
+
+    if (imageUrl !== undefined) {
+      const existingImages = await db
+        .select()
+        .from(productImages)
+        .where(eq(productImages.productId, id));
+
+      if (existingImages.length > 0) {
+        await db
+          .update(productImages)
+          .set({ url: imageUrl })
+          .where(eq(productImages.productId, id));
+      } else if (imageUrl) {
+        await db.insert(productImages).values({
+          productId: id,
+          url: imageUrl,
+          isPrimary: true,
+          sortOrder: 0,
+        });
+      }
+    }
 
     return NextResponse.json(updatedProduct);
   } catch (error) {
