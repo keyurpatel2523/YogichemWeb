@@ -1,17 +1,27 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Heart, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ProductCard } from '@/components/product/ProductCard';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useWishlistStore } from '@/lib/store';
+import { useWishlistStore, useUserStore } from '@/lib/store';
 
 export default function WishlistPage() {
+  const router = useRouter();
+  const { isAuthenticated } = useUserStore();
   const { items, clearWishlist } = useWishlistStore();
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      router.push('/login?redirect=/wishlist');
+      return;
+    }
+  }, [isAuthenticated, router]);
 
   useEffect(() => {
     const fetchProducts = async () => {

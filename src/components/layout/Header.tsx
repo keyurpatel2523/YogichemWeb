@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Search, ShoppingCart, Heart, User, Menu, X, ChevronDown, Truck, Package, Clock, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,10 +19,19 @@ const categories = [
 ];
 
 export function Header() {
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const cartItemCount = useCartStore((state) => state.getItemCount());
   const user = useUserStore((state) => state.user);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery('');
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm">
@@ -65,7 +75,7 @@ export function Header() {
             </div>
           </Link>
 
-          <div className="hidden md:flex flex-1 max-w-2xl mx-4">
+          <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-2xl mx-4">
             <div className="relative w-full">
               <Input
                 type="search"
@@ -76,7 +86,7 @@ export function Header() {
               />
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             </div>
-          </div>
+          </form>
 
           <div className="flex items-center gap-2 md:gap-4">
             <Link href={user ? '/account' : '/login'} className="flex flex-col items-center text-sm">
@@ -99,7 +109,7 @@ export function Header() {
           </div>
         </div>
 
-        <div className="md:hidden mt-3">
+        <form onSubmit={handleSearch} className="md:hidden mt-3">
           <div className="relative w-full">
             <Input
               type="search"
@@ -110,7 +120,7 @@ export function Header() {
             />
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
           </div>
-        </div>
+        </form>
       </div>
 
       <nav className="hidden lg:block bg-boots-gray border-y">

@@ -42,10 +42,14 @@ export default function CheckoutPage() {
   const total = subtotal + shippingCost;
 
   useEffect(() => {
+    if (!isAuthenticated()) {
+      router.push('/login?redirect=/checkout');
+      return;
+    }
     if (items.length === 0 && !orderComplete) {
       router.push('/cart');
     }
-  }, [items, router, orderComplete]);
+  }, [items, router, orderComplete, isAuthenticated]);
 
   const handleSubmitOrder = async () => {
     setLoading(true);
