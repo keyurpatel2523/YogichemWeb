@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/admin-auth';
 import { db } from '../../../../../server/db';
 import { orders, users, products } from '@shared/schema';
 import { eq, sql, count, lt } from 'drizzle-orm';
 
 export async function GET(request: NextRequest) {
+  const authError = requireAdmin(request);
+  if (authError) return authError;
+
   try {
     const [salesResult] = await db
       .select({ total: sql<number>`COALESCE(SUM(CAST(${orders.total} AS DECIMAL)), 0)` })

@@ -20,6 +20,7 @@ import {
   Boxes,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAdminStore } from '@/lib/admin-store';
 
 const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', href: '/admin' },
@@ -39,6 +40,59 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { admin, token, logout, isAuthenticated } = useAdminStore();
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    if (pathname === '/admin/login') {
+      setChecking(false);
+      return;
+    }
+
+    if (!token) {
+      router.push('/admin/login');
+      return;
+    }
+
+    fetch('/api/admin/auth', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => {
+        if (!res.ok) {
+          logout();
+          router.push('/admin/login');
+        }
+        setChecking(false);
+      })
+      .catch(() => {
+        logout();
+        router.push('/admin/login');
+      });
+  }, [pathname, token]);
+
+  if (pathname === '/admin/login') {
+    return <>{children}</>;
+  }
+
+  if (checking) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-boots-blue border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Verifying access...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated()) {
+    return null;
+  }
+
+  const handleLogout = () => {
+    logout();
+    router.push('/admin/login');
+  };
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -56,7 +110,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </button>
         </div>
 
-        <nav className="p-4">
+        <nav className="p-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 140px)' }}>
           <ul className="space-y-1">
             {menuItems.map((item) => {
               const isActive = pathname === item.href;
@@ -81,10 +135,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </nav>
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-700">
-          <Link href="/" className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:text-white">
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:text-white w-full"
+          >
             <LogOut className="w-5 h-5" />
-            Back to Store
-          </Link>
+            Logout
+          </button>
         </div>
       </aside>
 
@@ -96,7 +153,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </button>
             <div className="text-lg font-semibold">BootsShop Admin</div>
             <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-600">Admin User</span>
+              <span className="text-sm text-gray-600">{admin?.name || 'Admin'}</span>
+              <button
+                onClick={handleLogout}
+                className="text-sm text-red-600 hover:text-red-800"
+              >
+                Logout
+              </button>
             </div>
           </div>
         </header>

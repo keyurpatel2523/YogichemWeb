@@ -1,23 +1,17 @@
 'use client';
 
 import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, Eye, Package, Truck, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { formatPrice, formatDate } from '@/lib/utils';
+import { useAdminStore } from '@/lib/admin-store';
+import { toast } from '@/hooks/use-toast';
 
-const mockOrders = [
-  { id: 1, orderNumber: 'ORD-LK7X9-AB12', customer: 'John Smith', email: 'john@example.com', total: 89.99, status: 'processing', paymentStatus: 'paid', items: 3, createdAt: '2024-01-15T10:30:00' },
-  { id: 2, orderNumber: 'ORD-MN8Y2-CD34', customer: 'Sarah Johnson', email: 'sarah@example.com', total: 156.50, status: 'shipped', paymentStatus: 'paid', items: 5, createdAt: '2024-01-14T14:20:00' },
-  { id: 3, orderNumber: 'ORD-PQ3Z4-EF56', customer: 'Emma Wilson', email: 'emma@example.com', total: 42.00, status: 'delivered', paymentStatus: 'paid', items: 1, createdAt: '2024-01-13T09:15:00' },
-  { id: 4, orderNumber: 'ORD-RS5T6-GH78', customer: 'Michael Brown', email: 'michael@example.com', total: 234.99, status: 'processing', paymentStatus: 'paid', items: 8, createdAt: '2024-01-15T16:45:00' },
-  { id: 5, orderNumber: 'ORD-UV7W8-IJ90', customer: 'Lisa Davis', email: 'lisa@example.com', total: 78.25, status: 'pending', paymentStatus: 'pending', items: 2, createdAt: '2024-01-15T18:00:00' },
-  { id: 6, orderNumber: 'ORD-WX1Y2-KL34', customer: 'David Lee', email: 'david@example.com', total: 312.00, status: 'cancelled', paymentStatus: 'refunded', items: 4, createdAt: '2024-01-12T11:30:00' },
-];
-
-const statusIcons = {
+const statusIcons: Record<string, any> = {
   pending: Clock,
   processing: Package,
   shipped: Truck,
@@ -25,7 +19,7 @@ const statusIcons = {
   cancelled: XCircle,
 };
 
-const statusColors = {
+const statusColors: Record<string, string> = {
   pending: 'bg-gray-100 text-gray-700',
   processing: 'bg-yellow-100 text-yellow-700',
   shipped: 'bg-blue-100 text-blue-700',
@@ -36,13 +30,51 @@ const statusColors = {
 export default function AdminOrdersPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const { token } = useAdminStore();
+  const queryClient = useQueryClient();
 
-  const filteredOrders = mockOrders.filter((order) => {
-    const matchesSearch = order.orderNumber.toLowerCase().includes(search.toLowerCase()) ||
-      order.customer.toLowerCase().includes(search.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
-    return matchesSearch && matchesStatus;
+  const { data: orders = [], isLoading } = useQuery({
+    queryKey: ['admin', 'orders', statusFilter],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (statusFilter !== 'all') params.set('status', statusFilter);
+      params.set('limit', '100');
+      const res = await fetch(`/api/admin/orders?${params}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error('Failed to fetch orders');
+      return res.json();
+    },
   });
+
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ orderId, status }: { orderId: number; status: string }) => {
+      const res = await fetch('/api/admin/orders', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ orderId, status }),
+      });
+      if (!res.ok) throw new Error('Failed to update order');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'orders'] });
+      toast({ title: 'Order updated successfully' });
+    },
+  });
+
+  const filteredOrders = orders.filter((order: any) => {
+    const matchesSearch = order.orderNumber?.toLowerCase().includes(search.toLowerCase());
+    return matchesSearch || !search;
+  });
+
+  const getStatusCount = (status: string) => {
+    if (status === 'all') return orders.length;
+    return orders.filter((o: any) => o.status === status).length;
+  };
 
   return (
     <div className="space-y-6">
@@ -60,9 +92,7 @@ export default function AdminOrdersPage() {
               statusFilter === status ? 'bg-boots-blue text-white' : 'bg-white hover:bg-gray-50'
             }`}
           >
-            <p className="text-2xl font-bold">
-              {status === 'all' ? mockOrders.length : mockOrders.filter(o => o.status === status).length}
-            </p>
+            <p className="text-2xl font-bold">{getStatusCount(status)}</p>
             <p className="text-sm capitalize">{status}</p>
           </button>
         ))}
@@ -83,59 +113,77 @@ export default function AdminOrdersPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left py-3 px-4">Order</th>
-                  <th className="text-left py-3 px-4">Customer</th>
-                  <th className="text-left py-3 px-4">Items</th>
-                  <th className="text-left py-3 px-4">Total</th>
-                  <th className="text-left py-3 px-4">Status</th>
-                  <th className="text-left py-3 px-4">Payment</th>
-                  <th className="text-left py-3 px-4">Date</th>
-                  <th className="text-left py-3 px-4">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredOrders.map((order) => {
-                  const StatusIcon = statusIcons[order.status as keyof typeof statusIcons];
-                  return (
-                    <tr key={order.id} className="border-b hover:bg-gray-50">
-                      <td className="py-3 px-4 font-mono text-sm">{order.orderNumber}</td>
-                      <td className="py-3 px-4">
-                        <p className="font-medium">{order.customer}</p>
-                        <p className="text-sm text-gray-500">{order.email}</p>
-                      </td>
-                      <td className="py-3 px-4">{order.items}</td>
-                      <td className="py-3 px-4 font-medium">{formatPrice(order.total)}</td>
-                      <td className="py-3 px-4">
-                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                          statusColors[order.status as keyof typeof statusColors]
-                        }`}>
-                          <StatusIcon className="w-3 h-3" />
-                          {order.status}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4">
-                        <Badge variant={order.paymentStatus === 'paid' ? 'success' : order.paymentStatus === 'refunded' ? 'destructive' : 'secondary'}>
-                          {order.paymentStatus}
-                        </Badge>
-                      </td>
-                      <td className="py-3 px-4 text-sm text-gray-500">
-                        {formatDate(order.createdAt)}
-                      </td>
-                      <td className="py-3 px-4">
-                        <Button variant="ghost" size="icon">
-                          <Eye className="w-4 h-4" />
-                        </Button>
+          {isLoading ? (
+            <p className="text-center py-8 text-gray-500">Loading orders...</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-3 px-4">Order</th>
+                    <th className="text-left py-3 px-4">Total</th>
+                    <th className="text-left py-3 px-4">Status</th>
+                    <th className="text-left py-3 px-4">Payment</th>
+                    <th className="text-left py-3 px-4">Date</th>
+                    <th className="text-left py-3 px-4">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredOrders.length > 0 ? (
+                    filteredOrders.map((order: any) => {
+                      const StatusIcon = statusIcons[order.status] || Clock;
+                      return (
+                        <tr key={order.id} className="border-b hover:bg-gray-50">
+                          <td className="py-3 px-4 font-mono text-sm">{order.orderNumber}</td>
+                          <td className="py-3 px-4 font-medium">{formatPrice(Number(order.total))}</td>
+                          <td className="py-3 px-4">
+                            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                              statusColors[order.status] || 'bg-gray-100 text-gray-700'
+                            }`}>
+                              <StatusIcon className="w-3 h-3" />
+                              {order.status}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <Badge variant={order.paymentStatus === 'paid' ? 'default' : 'secondary'}>
+                              {order.paymentStatus}
+                            </Badge>
+                          </td>
+                          <td className="py-3 px-4 text-sm text-gray-500">
+                            {order.createdAt ? formatDate(order.createdAt) : '-'}
+                          </td>
+                          <td className="py-3 px-4">
+                            <select
+                              className="text-sm border rounded px-2 py-1"
+                              value={order.status}
+                              onChange={(e) =>
+                                updateStatusMutation.mutate({
+                                  orderId: order.id,
+                                  status: e.target.value,
+                                })
+                              }
+                            >
+                              <option value="pending">Pending</option>
+                              <option value="processing">Processing</option>
+                              <option value="shipped">Shipped</option>
+                              <option value="delivered">Delivered</option>
+                              <option value="cancelled">Cancelled</option>
+                            </select>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  ) : (
+                    <tr>
+                      <td colSpan={6} className="py-8 text-center text-gray-500">
+                        No orders found
                       </td>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
