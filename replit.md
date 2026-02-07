@@ -1,10 +1,10 @@
-# BootsShop - eCommerce Platform
+# Yogichem - eCommerce Platform
 
-A fully-featured, database-driven eCommerce platform inspired by Boots.com, built with Next.js 14, PostgreSQL, and Drizzle ORM.
+A fully-featured, database-driven eCommerce platform built with Next.js 14, PostgreSQL, and Drizzle ORM.
 
 ## Overview
 
-This project is a complete health and beauty eCommerce solution with a customer-facing storefront and comprehensive admin dashboard. It features a Boots-inspired aesthetic with professional blue (#003DA5) color scheme.
+This project is a complete health and beauty eCommerce solution with a customer-facing storefront and comprehensive admin dashboard. It features a professional blue (#003DA5) color scheme.
 
 ## Tech Stack
 
@@ -123,7 +123,7 @@ The seeder creates:
 - 16 sample products with images
 - Shipping rules for UK, Ireland, France, Germany, US
 - Coupon codes: SAVE20, WELLNESS15, BABY15, FREESHIP, WELCOME10
-- Admin user: admin@bootsshop.com / admin123
+- Admin user: admin@yogichem.com / admin123
 
 ## Recent Changes
 

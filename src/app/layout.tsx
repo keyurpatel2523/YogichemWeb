@@ -8,7 +8,7 @@ import { Toaster } from '@/components/ui/toaster';
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata: Metadata = {
-  title: 'BootsShop - Health & Beauty | Pharmacy & Prescriptions',
+  title: 'Yogichem - Health & Beauty | Pharmacy & Prescriptions',
   description: 'Shop health, beauty, baby & wellness products. Free delivery on orders over £25. Next day delivery available.',
   keywords: 'pharmacy, health, beauty, skincare, makeup, wellness, baby, prescriptions',
 };

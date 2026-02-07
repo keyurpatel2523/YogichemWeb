@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 const banners = [
   {
     id: 1,
-    title: "Big Boots Sale!",
+    title: "Big Yogichem Sale!",
     subtitle: "Save up to 50% on beauty, healthcare & more",
     cta: "Shop All Sale",
     href: "/sale",

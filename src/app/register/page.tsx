@@ -42,7 +42,7 @@ export default function RegisterPage() {
       }
 
       setUser(data.user, data.token);
-      toast({ title: 'Account created!', description: 'Welcome to BootsShop!' });
+      toast({ title: 'Account created!', description: 'Welcome to Yogichem!' });
       router.push('/account');
     } catch (error: any) {
       toast({ title: 'Registration failed', description: error.message });
@@ -57,7 +57,7 @@ export default function RegisterPage() {
         <Card>
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">Create Account</CardTitle>
-            <p className="text-gray-600">Join BootsShop today</p>
+            <p className="text-gray-600">Join Yogichem today</p>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">

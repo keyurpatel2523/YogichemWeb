@@ -53,7 +53,7 @@ export default function AdminLoginPage() {
             <Lock className="w-8 h-8 text-white" />
           </div>
           <CardTitle className="text-2xl font-bold text-boots-navy">Admin Login</CardTitle>
-          <p className="text-gray-500 text-sm mt-1">BootsShop Administration Panel</p>
+          <p className="text-gray-500 text-sm mt-1">Yogichem Administration Panel</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
@@ -69,7 +69,7 @@ export default function AdminLoginPage() {
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <Input
                   type="email"
-                  placeholder="admin@bootsshop.com"
+                  placeholder="admin@yogichem.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="pl-10"

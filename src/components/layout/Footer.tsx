@@ -49,7 +49,7 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="w-4 h-4" />
-                <span>help@bootsshop.com</span>
+                <span>help@yogichem.com</span>
               </li>
               <li className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 mt-1" />
@@ -67,9 +67,9 @@ export function Footer() {
 
         <div className="border-t border-gray-700 mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="text-2xl font-bold">BootsShop</div>
+            <div className="text-2xl font-bold">Yogichem</div>
             <div className="text-gray-400 text-sm text-center md:text-left">
-              © 2024 BootsShop. All rights reserved.
+              © 2024 Yogichem. All rights reserved.
             </div>
             <div className="flex items-center gap-4 text-gray-400 text-sm">
               <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>

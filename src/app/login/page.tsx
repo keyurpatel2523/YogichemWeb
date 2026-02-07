@@ -53,7 +53,7 @@ export default function LoginPage() {
         <Card>
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">Sign In</CardTitle>
-            <p className="text-gray-600">Welcome back to BootsShop</p>
+            <p className="text-gray-600">Welcome back to Yogichem</p>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">

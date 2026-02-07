@@ -8,8 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState({
-    storeName: 'BootsShop',
-    storeEmail: 'help@bootsshop.com',
+    storeName: 'Yogichem',
+    storeEmail: 'help@yogichem.com',
     storePhone: '0800 123 4567',
     currency: 'GBP',
     timezone: 'Europe/London',

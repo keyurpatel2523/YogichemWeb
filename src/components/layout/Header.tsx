@@ -61,7 +61,7 @@ export function Header() {
 
           <Link href="/" className="flex-shrink-0">
             <div className="text-2xl md:text-3xl font-bold text-boots-blue">
-              BootsShop
+              Yogichem
             </div>
           </Link>
 

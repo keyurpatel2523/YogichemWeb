@@ -151,7 +151,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <button className="lg:hidden" onClick={() => setSidebarOpen(true)}>
               <Menu className="w-6 h-6" />
             </button>
-            <div className="text-lg font-semibold">BootsShop Admin</div>
+            <div className="text-lg font-semibold">Yogichem Admin</div>
             <div className="flex items-center gap-4">
               <span className="text-sm text-gray-600">{admin?.name || 'Admin'}</span>
               <button
