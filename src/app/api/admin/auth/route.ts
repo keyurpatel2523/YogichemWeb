@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '../../../../../server/db';
+import { db, autoSeed } from '../../../../../server/db';
 import { adminUsers } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
@@ -9,6 +9,7 @@ const JWT_SECRET = process.env.SESSION_SECRET || '';
 
 export async function POST(request: NextRequest) {
   try {
+    await autoSeed();
     const body = await request.json();
     const { email, password } = body;
 

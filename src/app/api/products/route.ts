@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '../../../../server/db';
+import { db, autoSeed } from '../../../../server/db';
 import { products, productImages, categories } from '@shared/schema';
 import { eq, desc, and, or, ilike, sql } from 'drizzle-orm';
 
 export async function GET(request: NextRequest) {
   try {
+    await autoSeed();
     const searchParams = request.nextUrl.searchParams;
     const type = searchParams.get('type');
     const category = searchParams.get('category');
