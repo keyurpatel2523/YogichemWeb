@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { CreditCard, Truck, MapPin, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { CreditCard, Truck, MapPin, Clock, CheckCircle, AlertCircle, BookUser } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -80,6 +80,9 @@ export default function CheckoutPage() {
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
 
+  const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
+
   const [shippingAddress, setShippingAddress] = useState({
     firstName: user?.firstName || '',
     lastName: user?.lastName || '',
@@ -110,6 +113,22 @@ export default function CheckoutPage() {
   const shippingCost = deliveryMethod === 'nextday' ? 4.95 : subtotal >= 25 ? 0 : 3.50;
   const total = subtotal + shippingCost;
 
+  const applyAddress = (addr: any) => {
+    setShippingAddress({
+      firstName: addr.firstName || '',
+      lastName: addr.lastName || '',
+      email: user?.email || '',
+      phone: addr.phone || '',
+      address1: addr.address1 || '',
+      address2: addr.address2 || '',
+      city: addr.city || '',
+      postalCode: addr.postalCode || '',
+      country: addr.country || 'United Kingdom',
+    });
+    setAddressErrors({});
+    setSelectedAddressId(addr.id);
+  };
+
   useEffect(() => {
     if (!isAuthenticated()) {
       router.push('/login?redirect=/checkout');
@@ -117,8 +136,23 @@ export default function CheckoutPage() {
     }
     if (items.length === 0 && !orderComplete) {
       router.push('/cart');
+      return;
     }
-  }, [items, router, orderComplete, isAuthenticated]);
+
+    // Fetch saved addresses and auto-fill the default
+    if (token) {
+      fetch('/api/addresses', { headers: { Authorization: `Bearer ${token}` } })
+        .then((r) => r.json())
+        .then((addrs: any[]) => {
+          if (!Array.isArray(addrs) || addrs.length === 0) return;
+          setSavedAddresses(addrs);
+          const def = addrs.find((a) => a.isDefault) || addrs[0];
+          if (def) applyAddress(def);
+        })
+        .catch(() => {});
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const validateAddress = (): boolean => {
     const errors: Record<string, string> = {};
@@ -284,6 +318,33 @@ export default function CheckoutPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                {savedAddresses.length > 0 && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <BookUser className="w-4 h-4 text-boots-blue" />
+                      <span className="text-sm font-medium text-boots-blue">Saved Addresses</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {savedAddresses.map((addr) => (
+                        <button
+                          key={addr.id}
+                          type="button"
+                          onClick={() => applyAddress(addr)}
+                          className={`text-left px-3 py-2 rounded-md border text-xs transition-colors ${
+                            selectedAddressId === addr.id
+                              ? 'border-boots-blue bg-white text-boots-blue font-semibold'
+                              : 'border-gray-300 bg-white text-gray-700 hover:border-boots-blue'
+                          }`}
+                        >
+                          <span className="font-medium">{addr.firstName} {addr.lastName}</span>
+                          {addr.isDefault && <span className="ml-1 text-boots-blue">(Default)</span>}
+                          <br />
+                          <span className="text-gray-500">{addr.address1}, {addr.city}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <input
