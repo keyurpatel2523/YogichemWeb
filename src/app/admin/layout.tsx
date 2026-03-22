@@ -52,6 +52,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
 
     if (!token) {
+      setChecking(false);
       router.push('/admin/login');
       return;
     }
@@ -69,6 +70,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       .catch(() => {
         logout();
         router.push('/admin/login');
+        setChecking(false);
       });
   }, [pathname, token]);
 
