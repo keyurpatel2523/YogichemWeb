@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { formatPrice } from '@/lib/utils';
 import { useAdminStore } from '@/lib/admin-store';
 import { toast } from '@/hooks/use-toast';
+import { ImageUpload } from '@/components/admin/ImageUpload';
 
 function generateSlug(name: string): string {
   return name
@@ -329,14 +330,10 @@ export default function AdminProductEditPage() {
                 </select>
               </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
-              <Input
-                value={form.imageUrl}
-                onChange={(e) => setForm((prev) => ({ ...prev, imageUrl: e.target.value }))}
-                placeholder="https://example.com/image.jpg"
-              />
-            </div>
+            <ImageUpload
+              value={form.imageUrl}
+              onChange={(url) => setForm((prev) => ({ ...prev, imageUrl: url }))}
+            />
           </CardContent>
         </Card>
 

@@ -135,6 +135,9 @@ The seeder creates:
 - Fixed products list page with admin auth and working delete functionality
 - Product PATCH API now handles image URL updates
 - All admin API routes protected with JWT authentication (requireAdmin middleware)
+- Added file upload system: admin can upload PNG/JPG/WebP images (max 5MB) for products and categories
+- Image upload API at /api/admin/upload saves files to public/uploads/
+- ImageUpload component replaces URL inputs with drag-and-drop file picker + preview
 - Admin auth: separate JWT flow at /api/admin/auth
 - All admin pages use real database data via React Query
 - Fixed Server Component error (removed onContextMenu from body)

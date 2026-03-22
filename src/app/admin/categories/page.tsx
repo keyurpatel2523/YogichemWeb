@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useAdminStore } from '@/lib/admin-store';
 import { useToast } from '@/hooks/use-toast';
+import { ImageUpload } from '@/components/admin/ImageUpload';
 
 interface Category {
   id: number;
@@ -283,11 +284,10 @@ export default function AdminCategoriesPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Image URL</label>
-                  <Input
+                  <ImageUpload
                     value={form.image}
-                    onChange={(e) => setForm((prev) => ({ ...prev, image: e.target.value }))}
-                    placeholder="https://..."
+                    onChange={(url) => setForm((prev) => ({ ...prev, image: url }))}
+                    label="Category Image"
                   />
                 </div>
                 <div>
