@@ -118,43 +118,46 @@ export default function OrdersPage() {
               const date = new Date(order.createdAt);
 
               return (
-                <Card key={order.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <span className="font-bold text-boots-blue">{order.orderNumber}</span>
-                          <Badge className={status.color}>
-                            <StatusIcon className="w-3 h-3 mr-1" />
-                            {status.label}
-                          </Badge>
-                          {order.isNextDayDelivery && (
-                            <Badge variant="outline" className="text-green-600 border-green-300">
-                              Next Day
+                <Link key={order.id} href={`/account/orders/${order.id}`}>
+                  <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                    <CardContent className="p-6">
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <span className="font-bold text-boots-blue">{order.orderNumber}</span>
+                            <Badge className={status.color}>
+                              <StatusIcon className="w-3 h-3 mr-1" />
+                              {status.label}
                             </Badge>
+                            {order.isNextDayDelivery && (
+                              <Badge variant="outline" className="text-green-600 border-green-300">
+                                Next Day
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-sm text-gray-600">
+                            Placed on {date.toLocaleDateString('en-GB', {
+                              day: 'numeric',
+                              month: 'long',
+                              year: 'numeric',
+                            })}
+                          </p>
+                          <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
+                            <span>Payment: {order.paymentMethod === 'card' ? 'Card' : 'PayPal'}</span>
+                            <span>Delivery: {order.shippingMethod === 'standard' ? 'Standard' : order.shippingMethod === 'nextday' ? 'Next Day' : 'Click & Collect'}</span>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xl font-bold text-boots-blue">{formatPrice(order.total)}</p>
+                          {parseFloat(order.discount) > 0 && (
+                            <p className="text-sm text-green-600">Saved {formatPrice(order.discount)}</p>
                           )}
-                        </div>
-                        <p className="text-sm text-gray-600">
-                          Placed on {date.toLocaleDateString('en-GB', { 
-                            day: 'numeric', 
-                            month: 'long', 
-                            year: 'numeric' 
-                          })}
-                        </p>
-                        <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
-                          <span>Payment: {order.paymentMethod === 'card' ? 'Card' : 'PayPal'}</span>
-                          <span>Delivery: {order.shippingMethod === 'standard' ? 'Standard' : order.shippingMethod === 'nextday' ? 'Next Day' : 'Click & Collect'}</span>
+                          <p className="text-xs text-gray-400 mt-1">View details →</p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-xl font-bold text-boots-blue">{formatPrice(order.total)}</p>
-                        {parseFloat(order.discount) > 0 && (
-                          <p className="text-sm text-green-600">Saved {formatPrice(order.discount)}</p>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                </Link>
               );
             })}
           </div>
