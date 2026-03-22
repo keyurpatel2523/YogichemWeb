@@ -1,4 +1,4 @@
-import { sendEmail } from './replitmail';
+import { sendMail } from './sendgridMail';
 
 interface OrderEmailData {
   orderNumber: string;
@@ -70,7 +70,7 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData): Promise<
         <tr>
           <td style="background:#003DA5;padding:24px 32px;">
             <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:700;">Yogichem</h1>
-            <p style="margin:4px 0 0;color:#a0b8e0;font-size:13px;">Health & Beauty</p>
+            <p style="margin:4px 0 0;color:#a0b8e0;font-size:13px;">Health &amp; Beauty</p>
           </td>
         </tr>
 
@@ -172,7 +172,7 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData): Promise<
         <tr>
           <td style="background:#f5f5f5;padding:20px 32px;border-top:1px solid #e0e0e0;text-align:center;">
             <p style="margin:0;color:#999;font-size:12px;">
-              © 2024 Yogichem. All rights reserved.<br>
+              &copy; 2025 Yogichem. All rights reserved.<br>
               If you have questions, contact us at <a href="mailto:help@yogichem.com" style="color:#003DA5;">help@yogichem.com</a>
             </p>
           </td>
@@ -214,9 +214,11 @@ View your order at: https://yogichem.com/account/orders
 Thank you for shopping with Yogichem!
   `.trim();
 
-  await sendEmail({
+  await sendMail({
+    to: data.customerEmail,
     subject: `Order Confirmed — ${data.orderNumber} | Yogichem`,
     html,
     text,
+    bccAdmin: true,
   });
 }
