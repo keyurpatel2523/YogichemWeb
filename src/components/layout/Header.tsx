@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, ShoppingCart, Heart, User, Menu, X, ChevronDown, Truck, Package, Clock, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -22,8 +22,13 @@ export function Header() {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [mounted, setMounted] = useState(false);
   const cartItemCount = useCartStore((state) => state.getItemCount());
   const user = useUserStore((state) => state.user);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,9 +94,9 @@ export function Header() {
           </form>
 
           <div className="flex items-center gap-2 md:gap-4">
-            <Link href={user ? '/account' : '/login'} className="flex flex-col items-center text-sm">
+            <Link href={mounted && user ? '/account' : '/login'} className="flex flex-col items-center text-sm">
               <User className="w-6 h-6" />
-              <span className="hidden md:block text-xs">{user ? 'Account' : 'Sign In'}</span>
+              <span className="hidden md:block text-xs">{mounted && user ? 'Account' : 'Sign In'}</span>
             </Link>
             <Link href="/wishlist" className="flex flex-col items-center text-sm">
               <Heart className="w-6 h-6" />
@@ -99,7 +104,7 @@ export function Header() {
             </Link>
             <Link href="/cart" className="flex flex-col items-center text-sm relative">
               <ShoppingCart className="w-6 h-6" />
-              {cartItemCount > 0 && (
+              {mounted && cartItemCount > 0 && (
                 <Badge className="absolute -top-2 -right-2 w-5 h-5 flex items-center justify-center p-0 text-xs bg-boots-red">
                   {cartItemCount}
                 </Badge>
