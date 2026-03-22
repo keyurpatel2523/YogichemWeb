@@ -3,6 +3,7 @@ import { db } from '../../../../server/db';
 import { orders, orderItems, products } from '@shared/schema';
 import { eq, desc } from 'drizzle-orm';
 import { getUserFromRequest } from '@/lib/auth';
+import { sendOrderConfirmationEmail } from '@/utils/orderEmail';
 
 function generateOrderNumber(): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -62,6 +63,8 @@ export async function POST(request: NextRequest) {
       })
       .returning();
 
+    const savedItems: { name: string; quantity: number; price: string; total: string }[] = [];
+
     for (const item of items) {
       const [product] = await db
         .select({ price: products.price, name: products.name })
@@ -69,21 +72,31 @@ export async function POST(request: NextRequest) {
         .where(eq(products.id, item.productId))
         .limit(1);
 
+      const itemName = item.name || product?.name || 'Unknown';
+      const itemTotal = (item.price * item.quantity).toString();
+
       await db.insert(orderItems).values({
         orderId: newOrder.id,
         productId: item.productId,
-        name: item.name || product?.name || 'Unknown',
+        name: itemName,
         price: item.price.toString(),
         quantity: item.quantity,
-        total: (item.price * item.quantity).toString(),
+        total: itemTotal,
         variantId: item.variantId || null,
+      });
+
+      savedItems.push({
+        name: itemName,
+        quantity: item.quantity,
+        price: item.price.toString(),
+        total: itemTotal,
       });
 
       const [currentProduct] = await db
         .select({ stock: products.stock })
         .from(products)
         .where(eq(products.id, item.productId));
-      
+
       if (currentProduct) {
         await db
           .update(products)
@@ -91,6 +104,23 @@ export async function POST(request: NextRequest) {
           .where(eq(products.id, item.productId));
       }
     }
+
+    // Send order confirmation email (non-blocking — don't fail the order if email fails)
+    sendOrderConfirmationEmail({
+      orderNumber: newOrder.orderNumber,
+      customerName: `${shippingAddress.firstName} ${shippingAddress.lastName}`,
+      customerEmail: shippingAddress.email || '',
+      items: savedItems,
+      shippingAddress,
+      subtotal: subtotal.toString(),
+      shippingCost: shippingCost?.toString() || '0.00',
+      discount: discount?.toString() || '0.00',
+      total: total.toString(),
+      deliveryMethod: deliveryMethod || 'standard',
+      paymentMethod: paymentMethod || 'card',
+    }).catch((err) => {
+      console.error('Order confirmation email failed (non-fatal):', err?.message);
+    });
 
     return NextResponse.json({
       success: true,
@@ -106,7 +136,7 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const user = getUserFromRequest(request);
-    
+
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
