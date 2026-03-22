@@ -82,6 +82,7 @@ export default function CheckoutPage() {
 
   const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
+  const [profilePhone, setProfilePhone] = useState('');
 
   const [shippingAddress, setShippingAddress] = useState({
     firstName: user?.firstName || '',
@@ -113,12 +114,12 @@ export default function CheckoutPage() {
   const shippingCost = deliveryMethod === 'nextday' ? 4.95 : subtotal >= 25 ? 0 : 3.50;
   const total = subtotal + shippingCost;
 
-  const applyAddress = (addr: any) => {
+  const applyAddress = (addr: any, phone?: string) => {
     setShippingAddress({
       firstName: addr.firstName || '',
       lastName: addr.lastName || '',
       email: user?.email || '',
-      phone: addr.phone || '',
+      phone: addr.phone || phone || '',
       address1: addr.address1 || '',
       address2: addr.address2 || '',
       city: addr.city || '',
@@ -139,18 +140,35 @@ export default function CheckoutPage() {
       return;
     }
 
-    // Fetch saved addresses and auto-fill the default
-    if (token) {
+    if (!token) return;
+
+    // Fetch profile phone and saved addresses in parallel
+    Promise.all([
+      fetch('/api/auth/profile', { headers: { Authorization: `Bearer ${token}` } })
+        .then((r) => r.ok ? r.json() : null)
+        .catch(() => null),
       fetch('/api/addresses', { headers: { Authorization: `Bearer ${token}` } })
-        .then((r) => r.json())
-        .then((addrs: any[]) => {
-          if (!Array.isArray(addrs) || addrs.length === 0) return;
-          setSavedAddresses(addrs);
-          const def = addrs.find((a) => a.isDefault) || addrs[0];
-          if (def) applyAddress(def);
-        })
-        .catch(() => {});
-    }
+        .then((r) => r.ok ? r.json() : [])
+        .catch(() => []),
+    ]).then(([profile, addrs]) => {
+      const phone = profile?.phone || '';
+      if (phone) setProfilePhone(phone);
+
+      // Pre-fill phone from profile even if no saved address
+      setShippingAddress((prev) => ({
+        ...prev,
+        firstName: prev.firstName || user?.firstName || '',
+        lastName: prev.lastName || user?.lastName || '',
+        email: prev.email || user?.email || '',
+        phone: prev.phone || phone,
+      }));
+
+      if (Array.isArray(addrs) && addrs.length > 0) {
+        setSavedAddresses(addrs);
+        const def = addrs.find((a: any) => a.isDefault) || addrs[0];
+        if (def) applyAddress(def, phone);
+      }
+    });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -329,7 +347,7 @@ export default function CheckoutPage() {
                         <button
                           key={addr.id}
                           type="button"
-                          onClick={() => applyAddress(addr)}
+                          onClick={() => applyAddress(addr, profilePhone)}
                           className={`text-left px-3 py-2 rounded-md border text-xs transition-colors ${
                             selectedAddressId === addr.id
                               ? 'border-boots-blue bg-white text-boots-blue font-semibold'
