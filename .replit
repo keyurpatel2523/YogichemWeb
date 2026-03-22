@@ -42,4 +42,5 @@ build = ["npm", "run", "build"]
 [userenv]
 
 [userenv.shared]
-ADMIN_EMAIL = "admin@yogichem.com"
+ADMIN_EMAIL = "keyursuhani1530@gmail.com"
+SENDGRID_FROM_EMAIL = "keyursuhani1530@gmail.com"

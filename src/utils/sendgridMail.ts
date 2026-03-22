@@ -2,9 +2,9 @@ import sgMail from '@sendgrid/mail';
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY || '');
 
-export const FROM_EMAIL = 'orders@yogichem.com';
+export const FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL || 'keyursuhani1530@gmail.com';
 export const FROM_NAME = 'Yogichem';
-export const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@yogichem.com';
+export const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'keyursuhani1530@gmail.com';
 
 interface MailPayload {
   to: string;
