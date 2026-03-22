@@ -119,7 +119,8 @@ export async function POST(request: NextRequest) {
       deliveryMethod: deliveryMethod || 'standard',
       paymentMethod: paymentMethod || 'card',
     }).catch((err) => {
-      console.error('Order confirmation email failed (non-fatal):', err?.message);
+      const body = err?.response?.body || err?.response?.text || err?.message;
+      console.error('Order confirmation email failed (non-fatal):', JSON.stringify(body));
     });
 
     return NextResponse.json({
