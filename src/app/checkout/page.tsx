@@ -74,7 +74,7 @@ function FieldError({ msg }: { msg: string }) {
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, getTotal, clearCart } = useCartStore();
-  const { user, isAuthenticated } = useUserStore();
+  const { user, token, isAuthenticated } = useUserStore();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
@@ -185,7 +185,6 @@ export default function CheckoutPage() {
 
     setLoading(true);
     try {
-      const token = localStorage.getItem('auth_token');
       const res = await fetch('/api/orders', {
         method: 'POST',
         headers: {
