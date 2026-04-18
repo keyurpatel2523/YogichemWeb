@@ -65,7 +65,12 @@ function ProductView({ productSlug, breadcrumbs }: { productSlug: string; breadc
   const inCompare = isInCompare(product.id);
   const isOutOfStock = product.stock === 0;
   const nextDayAvailable = isNextDayDeliveryAvailable() && product.stock > 0;
-  const images = product.images?.length > 0 ? product.images : (product.image ? [product.image] : []);
+  // images is an array of objects {url, alt, ...} from the API
+  const images: string[] = product.images?.length > 0
+    ? product.images.map((img: any) => (typeof img === 'string' ? img : img.url)).filter(Boolean)
+    : product.image
+    ? [product.image]
+    : [];
 
   const handleAddToCart = () => {
     if (isOutOfStock) return;
