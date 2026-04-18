@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAdminStore } from '@/lib/admin-store';
 import { toast } from '@/hooks/use-toast';
 import { ImageUpload } from '@/components/admin/ImageUpload';
+import { CategoryCascadeSelect } from '@/components/admin/CategoryCascadeSelect';
 
 function generateSlug(name: string): string {
   return name
@@ -71,15 +72,6 @@ export default function AdminProductEditPage() {
       return res.json();
     },
     enabled: !!token && !!productId,
-  });
-
-  const { data: categories } = useQuery({
-    queryKey: ['categories'],
-    queryFn: async () => {
-      const res = await fetch('/api/categories');
-      if (!res.ok) throw new Error('Failed to fetch categories');
-      return res.json();
-    },
   });
 
   // Fetch active suppliers
@@ -310,12 +302,11 @@ export default function AdminProductEditPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                <select value={form.categoryId} onChange={(e) => setForm((prev) => ({ ...prev, categoryId: e.target.value }))} className={selectClass}>
-                  <option value="">No category</option>
-                  {categories?.map((cat: any) => (
-                    <option key={cat.id} value={cat.id}>{cat.name}</option>
-                  ))}
-                </select>
+                <CategoryCascadeSelect
+                  value={form.categoryId}
+                  onChange={(id) => setForm((prev) => ({ ...prev, categoryId: id }))}
+                  selectClass={selectClass}
+                />
               </div>
             </div>
             <ImageUpload value={form.imageUrl} onChange={(url) => setForm((prev) => ({ ...prev, imageUrl: url }))} />

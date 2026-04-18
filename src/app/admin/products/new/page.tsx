@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAdminStore } from '@/lib/admin-store';
 import { toast } from '@/hooks/use-toast';
 import { ImageUpload } from '@/components/admin/ImageUpload';
+import { CategoryCascadeSelect } from '@/components/admin/CategoryCascadeSelect';
 
 function generateSlug(name: string): string {
   return name
@@ -24,7 +25,6 @@ export default function AdminAddProductPage() {
   const router = useRouter();
   const { token } = useAdminStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [categories, setCategories] = useState<any[]>([]);
   const [suppliersList, setSuppliersList] = useState<any[]>([]);
 
   const [form, setForm] = useState({
@@ -57,11 +57,6 @@ export default function AdminAddProductPage() {
   });
 
   useEffect(() => {
-    fetch('/api/categories')
-      .then((res) => res.json())
-      .then((data) => setCategories(data))
-      .catch(() => {});
-
     fetch('/api/admin/suppliers', {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     })
@@ -184,12 +179,11 @@ export default function AdminAddProductPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                <select value={form.categoryId} onChange={(e) => setForm((prev) => ({ ...prev, categoryId: e.target.value }))} className={selectClass}>
-                  <option value="">No category</option>
-                  {categories?.map((cat: any) => (
-                    <option key={cat.id} value={cat.id}>{cat.name}</option>
-                  ))}
-                </select>
+                <CategoryCascadeSelect
+                  value={form.categoryId}
+                  onChange={(id) => setForm((prev) => ({ ...prev, categoryId: id }))}
+                  selectClass={selectClass}
+                />
               </div>
             </div>
             <ImageUpload value={form.imageUrl} onChange={(url) => setForm((prev) => ({ ...prev, imageUrl: url }))} />
