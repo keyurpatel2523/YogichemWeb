@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Edit, Trash2, FolderTree, X, ChevronRight } from 'lucide-react';
+import { Plus, Edit, Trash2, FolderTree, X } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,6 +22,7 @@ interface Category {
   isActive: boolean;
   createdAt: string;
   productCount: number;
+  subcategoryCount: number;
 }
 
 interface CategoryForm {
@@ -168,12 +169,6 @@ export default function AdminCategoriesPage() {
     setShowForm(true);
   }
 
-  function handleAddSubcategory(parentId: number) {
-    setForm({ ...emptyForm, parentId });
-    setEditingId(null);
-    setShowForm(true);
-  }
-
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.name || !form.slug) {
@@ -188,11 +183,6 @@ export default function AdminCategoriesPage() {
   }
 
   const parentCategories = categories.filter((c) => !c.parentId);
-  const getParentName = (parentId: number | null) => {
-    if (!parentId) return null;
-    const parent = categories.find((c) => c.id === parentId);
-    return parent?.name || null;
-  };
 
   const sortedCategories = [...categories].sort((a, b) => {
     if (a.parentId === null && b.parentId !== null) return -1;
@@ -345,36 +335,23 @@ export default function AdminCategoriesPage() {
                   <tr className="border-b">
                     <th className="text-left py-3 px-4">Name</th>
                     <th className="text-left py-3 px-4">Slug</th>
-                    <th className="text-left py-3 px-4">Parent</th>
-                    <th className="text-left py-3 px-4">Products</th>
+                    <th className="text-left py-3 px-4">Subcategories</th>
+                    <th className="text-left py-3 px-4">Total Products</th>
                     <th className="text-left py-3 px-4">Status</th>
                     <th className="text-left py-3 px-4">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {orderedCategories.map((category) => {
-                    const parentName = getParentName(category.parentId);
-                    return (
+                  {orderedCategories.map((category) => (
                       <tr key={category.id} className="border-b hover:bg-gray-50">
-                        <td className="py-3 px-4">
-                          <div className="flex items-center gap-1">
-                            {category.parentId && (
-                              <ChevronRight className="w-4 h-4 text-gray-400 ml-4" />
-                            )}
-                            <span className={category.parentId ? 'text-gray-700' : 'font-medium'}>
-                              {category.name}
-                            </span>
-                          </div>
-                        </td>
+                        <td className="py-3 px-4 font-medium">{category.name}</td>
                         <td className="py-3 px-4 text-sm text-gray-500">{category.slug}</td>
                         <td className="py-3 px-4">
-                          {parentName ? (
-                            <Badge variant="secondary">{parentName}</Badge>
-                          ) : (
-                            <span className="text-gray-400 text-sm">—</span>
-                          )}
+                          <Badge variant="secondary">{category.subcategoryCount}</Badge>
                         </td>
-                        <td className="py-3 px-4">{category.productCount}</td>
+                        <td className="py-3 px-4">
+                          <Badge variant="outline">{category.productCount}</Badge>
+                        </td>
                         <td className="py-3 px-4">
                           <Badge variant={category.isActive ? 'default' : 'secondary'}>
                             {category.isActive ? 'Active' : 'Inactive'}
@@ -382,16 +359,6 @@ export default function AdminCategoriesPage() {
                         </td>
                         <td className="py-3 px-4">
                           <div className="flex items-center gap-1">
-                            {!category.parentId && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleAddSubcategory(category.id)}
-                                title="Add Subcategory"
-                              >
-                                <Plus className="w-4 h-4" />
-                              </Button>
-                            )}
                             <Button
                               variant="ghost"
                               size="icon"
@@ -434,8 +401,7 @@ export default function AdminCategoriesPage() {
                           </div>
                         </td>
                       </tr>
-                    );
-                  })}
+                  ))}
                 </tbody>
               </table>
             </div>

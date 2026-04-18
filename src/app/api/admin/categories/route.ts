@@ -20,7 +20,14 @@ export async function GET(request: NextRequest) {
         sortOrder: categories.sortOrder,
         isActive: categories.isActive,
         createdAt: categories.createdAt,
-        productCount: sql<number>`(SELECT COUNT(*) FROM products WHERE products.category_id = ${categories.id})`.mapWith(Number),
+        productCount: sql<number>`(
+          SELECT COUNT(*) FROM products
+          WHERE products.category_id = ${categories.id}
+          OR products.category_id IN (
+            SELECT id FROM categories sub WHERE sub.parent_id = ${categories.id}
+          )
+        )`.mapWith(Number),
+        subcategoryCount: sql<number>`(SELECT COUNT(*) FROM categories sub WHERE sub.parent_id = ${categories.id})`.mapWith(Number),
       })
       .from(categories)
       .orderBy(categories.sortOrder, categories.name);
