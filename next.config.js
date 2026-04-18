@@ -10,6 +10,15 @@ const nextConfig = {
       allowedOrigins: ['*'],
     },
   },
+  async redirects() {
+    return [
+      {
+        source: '/category/:slug*',
+        destination: '/:slug*',
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {

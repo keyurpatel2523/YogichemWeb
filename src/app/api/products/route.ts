@@ -50,12 +50,17 @@ export async function GET(request: NextRequest) {
         isOnSale: products.isOnSale,
         salePercentage: products.salePercentage,
         isFeatured: products.isFeatured,
+        categoryId: products.categoryId,
       })
       .from(products)
       .where(and(...conditions))
       .orderBy(desc(products.createdAt))
       .limit(limit)
       .offset(offset);
+
+    // Fetch all categories once for slug lookup
+    const allCategories = await db.select().from(categories);
+    const catMap = new Map(allCategories.map((c) => [c.id, c]));
 
     const productsWithImages = await Promise.all(
       productList.map(async (product) => {
@@ -64,10 +69,27 @@ export async function GET(request: NextRequest) {
           .from(productImages)
           .where(eq(productImages.productId, product.id))
           .limit(1);
-        
+
+        let categorySlug: string | null = null;
+        let parentCategorySlug: string | null = null;
+        if (product.categoryId) {
+          const cat = catMap.get(product.categoryId);
+          if (cat) {
+            if (cat.parentId) {
+              categorySlug = cat.slug;
+              const parent = catMap.get(cat.parentId);
+              parentCategorySlug = parent?.slug ?? null;
+            } else {
+              categorySlug = cat.slug;
+            }
+          }
+        }
+
         return {
           ...product,
           image: images[0]?.url || 'https://via.placeholder.com/400',
+          categorySlug,
+          parentCategorySlug,
         };
       })
     );

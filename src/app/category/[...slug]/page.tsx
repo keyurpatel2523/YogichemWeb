@@ -74,7 +74,7 @@ export default function CategoryPage({ params }: { params: { slug: string[] } })
           <span className="mx-2">/</span>
           {subcategorySlug ? (
             <>
-              <Link href={`/category/${categorySlug}`} className="hover:text-[#003DA5]">{categoryName}</Link>
+              <Link href={`/${categorySlug}`} className="hover:text-[#003DA5]">{categoryName}</Link>
               <span className="mx-2">/</span>
               <span className="text-gray-900">{subcategoryName}</span>
             </>

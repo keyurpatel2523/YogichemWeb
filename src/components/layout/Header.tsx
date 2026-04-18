@@ -10,12 +10,12 @@ import { Badge } from '@/components/ui/badge';
 import { useCartStore, useUserStore } from '@/lib/store';
 
 const categories = [
-  { name: 'Beauty', href: '/category/beauty', subcategories: ['Skincare', 'Makeup', 'Fragrance', 'Haircare'] },
-  { name: 'Health', href: '/category/health', subcategories: ['Vitamins', 'Pain Relief', 'Cold & Flu', 'First Aid'] },
-  { name: 'Baby & Child', href: '/category/baby', subcategories: ['Baby Food', 'Nappies', 'Toys', 'Clothing'] },
-  { name: 'Wellness', href: '/category/wellness', subcategories: ['Supplements', 'Sleep', 'Stress', 'Immunity'] },
-  { name: 'Electrical', href: '/category/electrical', subcategories: ['Hair Styling', 'Oral Care', 'Skincare Devices'] },
-  { name: 'Gifts', href: '/category/gifts', subcategories: ['For Her', 'For Him', 'Gift Sets'] },
+  { name: 'Beauty', href: '/beauty', subcategories: ['Skincare', 'Makeup', 'Fragrance', 'Haircare'] },
+  { name: 'Health', href: '/health', subcategories: ['Vitamins', 'Pain Relief', 'Cold & Flu', 'First Aid'] },
+  { name: 'Baby & Child', href: '/baby', subcategories: ['Baby Food', 'Nappies', 'Toys', 'Clothing'] },
+  { name: 'Wellness', href: '/wellness', subcategories: ['Supplements', 'Sleep', 'Stress', 'Immunity'] },
+  { name: 'Electrical', href: '/electrical', subcategories: ['Hair Styling', 'Oral Care', 'Skincare Devices'] },
+  { name: 'Gifts', href: '/gifts', subcategories: ['For Her', 'For Him', 'Gift Sets'] },
 ];
 
 export function Header() {

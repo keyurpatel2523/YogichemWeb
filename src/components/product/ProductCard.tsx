@@ -22,6 +22,8 @@ interface ProductCardProps {
     isOnSale?: boolean;
     salePercentage?: number | null;
     isFeatured?: boolean;
+    categorySlug?: string | null;
+    parentCategorySlug?: string | null;
   };
 }
 
@@ -75,8 +77,18 @@ export function ProductCard({ product }: ProductCardProps) {
     }
   };
 
+  const productHref = (() => {
+    if (product.parentCategorySlug && product.categorySlug) {
+      return `/${product.parentCategorySlug}/${product.categorySlug}/${product.slug}`;
+    }
+    if (product.categorySlug) {
+      return `/${product.categorySlug}/${product.slug}`;
+    }
+    return `/product/${product.slug}`;
+  })();
+
   return (
-    <Link href={`/product/${product.slug}`}>
+    <Link href={productHref}>
       <Card className="group h-full overflow-hidden hover:shadow-lg transition-shadow duration-300">
         <div className="relative aspect-square overflow-hidden bg-gray-100">
           <Image

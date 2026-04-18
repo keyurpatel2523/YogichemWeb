@@ -9,11 +9,11 @@ export function Footer() {
           <div>
             <h3 className="text-lg font-bold mb-4">Shop</h3>
             <ul className="space-y-2 text-gray-300">
-              <li><Link href="/category/beauty" className="hover:text-white transition-colors">Beauty</Link></li>
-              <li><Link href="/category/health" className="hover:text-white transition-colors">Health</Link></li>
-              <li><Link href="/category/baby" className="hover:text-white transition-colors">Baby & Child</Link></li>
-              <li><Link href="/category/wellness" className="hover:text-white transition-colors">Wellness</Link></li>
-              <li><Link href="/category/electrical" className="hover:text-white transition-colors">Electrical</Link></li>
+              <li><Link href="/beauty" className="hover:text-white transition-colors">Beauty</Link></li>
+              <li><Link href="/health" className="hover:text-white transition-colors">Health</Link></li>
+              <li><Link href="/baby" className="hover:text-white transition-colors">Baby & Child</Link></li>
+              <li><Link href="/wellness" className="hover:text-white transition-colors">Wellness</Link></li>
+              <li><Link href="/electrical" className="hover:text-white transition-colors">Electrical</Link></li>
               <li><Link href="/sale" className="hover:text-white transition-colors text-boots-red">Sale</Link></li>
             </ul>
           </div>

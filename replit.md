@@ -125,6 +125,20 @@ The seeder creates:
 - Coupon codes: SAVE20, WELLNESS15, BABY15, FREESHIP, WELCOME10
 - Admin user: admin@yogichem.com / admin123
 
+## URL Structure
+
+Products and categories now use clean root-level URLs (no `/category/` or `/product/` prefix):
+- Category: `/{category-slug}` e.g. `/beauty`
+- Subcategory: `/{parent-slug}/{sub-slug}` e.g. `/beauty/skincare`
+- Product in subcategory: `/{parent-slug}/{sub-slug}/{product-slug}` e.g. `/beauty/skincare/chanel-no5`
+- Product in parent category directly: `/{category-slug}/{product-slug}` e.g. `/beauty/chanel-no5`
+
+Old `/category/*` URLs automatically redirect (308) to the new format.
+Old `/product/[slug]` pages still work as fallback.
+
+The root-level `src/app/[...slug]/page.tsx` catch-all handles all slug routing.
+Static routes (cart, checkout, admin, etc.) take priority over the catch-all.
+
 ## Recent Changes
 
 - Rebranded from BootsShop to Yogichem across entire platform

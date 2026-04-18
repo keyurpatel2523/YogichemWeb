@@ -15,7 +15,7 @@ export default function HomePage() {
             title="Fragrance Sale"
             subtitle="Save 20% on selected fragrance favourites with code SAVE20"
             cta="Shop Now"
-            href="/category/beauty/fragrance"
+            href="/beauty/fragrance"
             bgColor="bg-gradient-to-r from-purple-500 to-pink-500"
             badge="HURRY, TODAY ONLY!"
           />
@@ -23,7 +23,7 @@ export default function HomePage() {
             title="Wellness Week"
             subtitle="Save 15% across 100s of wellness favourites with code WELLNESS15"
             cta="Shop Now"
-            href="/category/wellness"
+            href="/wellness"
             bgColor="bg-gradient-to-r from-boots-teal to-emerald-500"
             badge="SAVE 15%"
           />
@@ -38,7 +38,7 @@ export default function HomePage() {
             title="Electrical Beauty"
             subtitle="Save up to 60% on selected electrical beauty"
             cta="Shop Now"
-            href="/category/electrical"
+            href="/electrical"
             bgColor="bg-gradient-to-r from-boots-blue to-indigo-600"
             badge="SAVE UP TO 60%"
           />
@@ -46,7 +46,7 @@ export default function HomePage() {
             title="Skincare Saviours"
             subtitle="Save up to 1/2 price on selected skincare"
             cta="Shop Now"
-            href="/category/beauty/skincare"
+            href="/beauty/skincare"
             bgColor="bg-gradient-to-r from-pink-400 to-rose-500"
             badge="SAVE UP TO 1/2 PRICE"
           />
@@ -54,7 +54,7 @@ export default function HomePage() {
             title="Baby Essentials"
             subtitle="Save 15% when you spend £40 on selected baby using code BABY15"
             cta="Shop Now"
-            href="/category/baby"
+            href="/baby"
             bgColor="bg-gradient-to-r from-yellow-400 to-orange-400"
             badge="SAVE 15%"
           />
