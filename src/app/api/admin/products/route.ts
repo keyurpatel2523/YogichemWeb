@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { db } from '../../../../../server/db';
-import { products, productImages } from '@shared/schema';
+import { products, productImages, supplierProducts } from '@shared/schema';
 import { eq, desc } from 'drizzle-orm';
 
 export async function GET(request: NextRequest) {
@@ -43,18 +43,11 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const {
-      name,
-      slug,
-      description,
-      price,
-      compareAtPrice,
-      categoryId,
-      stock,
-      sku,
-      isFeatured,
-      isOnSale,
-      salePercentage,
-      imageUrl,
+      name, slug, description, shortDescription, price, compareAtPrice, costPrice,
+      wholesalePrice, categoryId, stock, lowStockThreshold, sku, isFeatured, isOnSale,
+      salePercentage, imageUrl, isActive, metaTitle, metaDescription, tags,
+      // Supplier fields
+      supplierId, supplierSku, supplierLeadTimeDays, supplierMinOrderQty, supplierCost,
     } = body;
 
     if (!name || !slug || !price) {
@@ -70,14 +63,22 @@ export async function POST(request: NextRequest) {
         name,
         slug,
         description: description || null,
+        shortDescription: shortDescription || null,
         price,
         compareAtPrice: compareAtPrice || null,
+        costPrice: costPrice || null,
+        wholesalePrice: wholesalePrice || null,
         categoryId: categoryId || null,
         stock: stock || 0,
+        lowStockThreshold: lowStockThreshold || 10,
         sku: sku || null,
         isFeatured: isFeatured || false,
         isOnSale: isOnSale || false,
         salePercentage: salePercentage || null,
+        isActive: isActive !== undefined ? isActive : true,
+        metaTitle: metaTitle || null,
+        metaDescription: metaDescription || null,
+        tags: tags || null,
       })
       .returning();
 
@@ -87,6 +88,18 @@ export async function POST(request: NextRequest) {
         url: imageUrl,
         isPrimary: true,
         sortOrder: 0,
+      });
+    }
+
+    // Link supplier if provided
+    if (supplierId) {
+      await db.insert(supplierProducts).values({
+        productId: newProduct.id,
+        supplierId: parseInt(supplierId),
+        supplierSku: supplierSku || null,
+        cost: supplierCost || null,
+        leadTimeDays: supplierLeadTimeDays ? parseInt(supplierLeadTimeDays) : null,
+        minOrderQuantity: supplierMinOrderQty ? parseInt(supplierMinOrderQty) : 1,
       });
     }
 
@@ -103,7 +116,12 @@ export async function PATCH(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { id, imageUrl, ...updateData } = body;
+    const {
+      id, imageUrl,
+      // Supplier fields (extracted separately)
+      supplierId, supplierSku, supplierLeadTimeDays, supplierMinOrderQty, supplierCost,
+      ...updateData
+    } = body;
 
     if (!id) {
       return NextResponse.json({ error: 'Product ID required' }, { status: 400 });
@@ -138,6 +156,42 @@ export async function PATCH(request: NextRequest) {
       }
     }
 
+    // Upsert supplier link
+    const existingLink = await db
+      .select()
+      .from(supplierProducts)
+      .where(eq(supplierProducts.productId, id))
+      .limit(1);
+
+    if (supplierId) {
+      if (existingLink.length > 0) {
+        await db
+          .update(supplierProducts)
+          .set({
+            supplierId: parseInt(supplierId),
+            supplierSku: supplierSku || null,
+            cost: supplierCost || null,
+            leadTimeDays: supplierLeadTimeDays ? parseInt(supplierLeadTimeDays) : null,
+            minOrderQuantity: supplierMinOrderQty ? parseInt(supplierMinOrderQty) : 1,
+          })
+          .where(eq(supplierProducts.productId, id));
+      } else {
+        await db.insert(supplierProducts).values({
+          productId: id,
+          supplierId: parseInt(supplierId),
+          supplierSku: supplierSku || null,
+          cost: supplierCost || null,
+          leadTimeDays: supplierLeadTimeDays ? parseInt(supplierLeadTimeDays) : null,
+          minOrderQuantity: supplierMinOrderQty ? parseInt(supplierMinOrderQty) : 1,
+        });
+      }
+    } else if (supplierId === '' || supplierId === null) {
+      // Explicitly cleared — remove the link
+      if (existingLink.length > 0) {
+        await db.delete(supplierProducts).where(eq(supplierProducts.productId, id));
+      }
+    }
+
     return NextResponse.json(updatedProduct);
   } catch (error) {
     console.error('Error updating product:', error);
@@ -157,6 +211,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Product ID required' }, { status: 400 });
     }
 
+    await db.delete(supplierProducts).where(eq(supplierProducts.productId, parseInt(id)));
     await db.delete(productImages).where(eq(productImages.productId, parseInt(id)));
     await db.delete(products).where(eq(products.id, parseInt(id)));
 

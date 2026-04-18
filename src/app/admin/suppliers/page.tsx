@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Plus, Edit, Trash2, Package, AlertTriangle, TrendingUp,
@@ -255,6 +256,7 @@ export default function AdminSuppliersPage() {
                       <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Contact Info</th>
                       <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Contact Person</th>
                       <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Address</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Products</th>
                       <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Status</th>
                       <th className="text-right py-3 px-4 text-sm font-semibold text-gray-600">Actions</th>
                     </tr>
@@ -301,6 +303,16 @@ export default function AdminSuppliersPage() {
                             </div>
                           ) : (
                             <span className="text-gray-400 text-sm">—</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4">
+                          {(supplier as any).productCount > 0 ? (
+                            <Link href={`/admin/products?supplier=${supplier.id}`} className="flex items-center gap-1 text-sm font-semibold text-[#003DA5] hover:underline">
+                              <Package className="w-3.5 h-3.5" />
+                              {(supplier as any).productCount} product{(supplier as any).productCount !== 1 ? 's' : ''}
+                            </Link>
+                          ) : (
+                            <span className="text-gray-400 text-sm">No products</span>
                           )}
                         </td>
                         <td className="py-3 px-4">

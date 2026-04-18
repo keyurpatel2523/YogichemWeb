@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { db } from '../../../../../../server/db';
-import { products, productImages, categories } from '@shared/schema';
+import { products, productImages, categories, supplierProducts, suppliers } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 
 export async function GET(
@@ -42,10 +42,30 @@ export async function GET(
       category = cat || null;
     }
 
+    // Fetch linked supplier
+    const [supplierLink] = await db
+      .select({
+        id: supplierProducts.id,
+        supplierId: supplierProducts.supplierId,
+        supplierSku: supplierProducts.supplierSku,
+        cost: supplierProducts.cost,
+        leadTimeDays: supplierProducts.leadTimeDays,
+        minOrderQuantity: supplierProducts.minOrderQuantity,
+        supplierName: suppliers.name,
+        supplierEmail: suppliers.email,
+        supplierPhone: suppliers.phone,
+        supplierContactPerson: suppliers.contactPerson,
+      })
+      .from(supplierProducts)
+      .leftJoin(suppliers, eq(supplierProducts.supplierId, suppliers.id))
+      .where(eq(supplierProducts.productId, productId))
+      .limit(1);
+
     return NextResponse.json({
       ...product,
       images,
       category,
+      supplierLink: supplierLink || null,
     });
   } catch (error) {
     console.error('Error fetching product:', error);
