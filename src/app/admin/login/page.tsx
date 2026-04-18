@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Lock, Mail, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { useAdminStore } from '@/lib/admin-store';
 
 export default function AdminLoginPage() {
@@ -48,14 +49,20 @@ export default function AdminLoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#001d52] to-[#003DA5] flex items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-2xl">
-        <CardHeader className="text-center pb-2">
-          <div className="mx-auto w-16 h-16 bg-boots-blue rounded-full flex items-center justify-center mb-4">
-            <Lock className="w-8 h-8 text-white" />
-          </div>
-          <CardTitle className="text-2xl font-bold text-boots-navy">Admin Login</CardTitle>
-          <p className="text-gray-500 text-sm mt-1">Yogichem Administration Panel</p>
-        </CardHeader>
-        <CardContent>
+        <div className="flex justify-center pt-8 pb-2">
+          <Image
+            src="/logo.jpeg"
+            alt="Yogichem Health and Beauty"
+            width={200}
+            height={84}
+            className="h-24 w-auto object-contain"
+            priority
+          />
+        </div>
+        <div className="text-center pb-4">
+          <p className="text-gray-500 text-sm font-medium">Administration Panel</p>
+        </div>
+        <CardContent className="pt-2">
           <form onSubmit={handleLogin} className="space-y-4">
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">

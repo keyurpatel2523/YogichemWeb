@@ -11,9 +11,11 @@ interface AdminUser {
 interface AdminStore {
   admin: AdminUser | null;
   token: string | null;
+  _hydrated: boolean;
   setAdmin: (admin: AdminUser, token: string) => void;
   logout: () => void;
   isAuthenticated: () => boolean;
+  setHydrated: () => void;
 }
 
 export const useAdminStore = create<AdminStore>()(
@@ -21,16 +23,21 @@ export const useAdminStore = create<AdminStore>()(
     (set, get) => ({
       admin: null,
       token: null,
+      _hydrated: false,
       setAdmin: (admin, token) => {
         set({ admin, token });
-        localStorage.setItem('admin_token', token);
       },
       logout: () => {
         set({ admin: null, token: null });
-        localStorage.removeItem('admin_token');
       },
       isAuthenticated: () => get().token !== null,
+      setHydrated: () => set({ _hydrated: true }),
     }),
-    { name: 'admin-storage' }
+    {
+      name: 'admin-storage',
+      onRehydrateStorage: () => (state) => {
+        state?.setHydrated();
+      },
+    }
   )
 );

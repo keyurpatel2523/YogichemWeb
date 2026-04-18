@@ -44,7 +44,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { admin, token, logout, isAuthenticated } = useAdminStore();
+  const { admin, token, logout, isAuthenticated, _hydrated } = useAdminStore();
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
@@ -52,6 +52,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       setChecking(false);
       return;
     }
+
+    if (!_hydrated) return;
 
     if (!token) {
       setChecking(false);
@@ -74,7 +76,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         router.push('/admin/login');
         setChecking(false);
       });
-  }, [pathname, token]);
+  }, [pathname, token, _hydrated]);
 
   if (pathname === '/admin/login') {
     return <>{children}</>;
