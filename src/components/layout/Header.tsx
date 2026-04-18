@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, ShoppingCart, Heart, User, Menu, X, ChevronDown, Truck, Package, Clock, MapPin } from 'lucide-react';
@@ -75,9 +76,14 @@ export function Header() {
           </button>
 
           <Link href="/" className="flex-shrink-0">
-            <div className="text-2xl md:text-3xl font-bold text-boots-blue">
-              Yogichem
-            </div>
+            <Image
+              src="/logo.jpeg"
+              alt="Yogichem Health and Beauty"
+              width={180}
+              height={76}
+              className="h-16 w-auto object-contain"
+              priority
+            />
           </Link>
 
           <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-2xl mx-4">

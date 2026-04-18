@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin } from 'lucide-react';
 
 export function Footer() {
@@ -67,7 +68,9 @@ export function Footer() {
 
         <div className="border-t border-gray-700 mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="text-2xl font-bold">Yogichem</div>
+            <div className="bg-white rounded p-1">
+              <Image src="/logo.jpeg" alt="Yogichem" width={100} height={42} className="h-10 w-auto object-contain" />
+            </div>
             <div className="text-gray-400 text-sm text-center md:text-left">
               © 2024 Yogichem. All rights reserved.
             </div>

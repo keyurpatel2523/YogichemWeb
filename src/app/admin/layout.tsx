@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   LayoutDashboard,
   Package,
@@ -107,8 +108,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         } lg:translate-x-0 transition-transform duration-200`}
       >
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
-          <Link href="/admin" className="text-xl font-bold">
-            Admin Panel
+          <Link href="/admin" className="flex items-center gap-2">
+            <Image src="/logo.jpeg" alt="Yogichem" width={90} height={38} className="h-9 w-auto object-contain bg-white rounded p-0.5" />
           </Link>
           <button className="lg:hidden" onClick={() => setSidebarOpen(false)}>
             <X className="w-6 h-6" />
@@ -156,7 +157,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <button className="lg:hidden" onClick={() => setSidebarOpen(true)}>
               <Menu className="w-6 h-6" />
             </button>
-            <div className="text-lg font-semibold">Yogichem Admin</div>
+            <div className="flex items-center gap-2">
+              <Image src="/logo.jpeg" alt="Yogichem" width={90} height={38} className="h-9 w-auto object-contain" />
+              <span className="text-sm font-semibold text-gray-600">Admin</span>
+            </div>
             <div className="flex items-center gap-4">
               <span className="text-sm text-gray-600">{admin?.name || 'Admin'}</span>
               <button
