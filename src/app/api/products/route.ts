@@ -27,6 +27,9 @@ export async function GET(request: NextRequest) {
       });
       if (cat) {
         conditions.push(eq(products.categoryId, cat.id));
+      } else {
+        // Category not found — return no results
+        return NextResponse.json([]);
       }
     }
 
