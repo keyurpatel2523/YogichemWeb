@@ -204,17 +204,7 @@ export default function AdminCategoriesPage() {
     return parentA - parentB;
   });
 
-  const orderedCategories: Category[] = [];
-  const parents = sortedCategories.filter((c) => !c.parentId);
-  parents.forEach((parent) => {
-    orderedCategories.push(parent);
-    const children = sortedCategories.filter((c) => c.parentId === parent.id);
-    orderedCategories.push(...children);
-  });
-  const orphanChildren = sortedCategories.filter(
-    (c) => c.parentId && !parents.find((p) => p.id === c.parentId)
-  );
-  orderedCategories.push(...orphanChildren);
+  const orderedCategories = sortedCategories.filter((c) => !c.parentId);
 
   return (
     <div className="space-y-6">
@@ -341,7 +331,7 @@ export default function AdminCategoriesPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>All Categories ({categories.length})</CardTitle>
+          <CardTitle>All Categories ({orderedCategories.length})</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
