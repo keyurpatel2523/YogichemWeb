@@ -68,8 +68,8 @@ export function Footer() {
 
         <div className="border-t border-gray-700 mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="bg-white rounded p-1">
-              <Image src="/logo.jpeg" alt="Yogichem" width={100} height={42} className="h-10 w-auto object-contain" />
+            <div className="bg-white rounded-lg p-2">
+              <Image src="/logo.jpeg" alt="Yogichem" width={180} height={76} className="h-16 w-auto object-contain" />
             </div>
             <div className="text-gray-400 text-sm text-center md:text-left">
               © 2024 Yogichem. All rights reserved.

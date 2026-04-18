@@ -79,9 +79,9 @@ export function Header() {
             <Image
               src="/logo.jpeg"
               alt="Yogichem Health and Beauty"
-              width={180}
-              height={76}
-              className="h-16 w-auto object-contain"
+              width={240}
+              height={100}
+              className="h-20 w-auto object-contain"
               priority
             />
           </Link>
