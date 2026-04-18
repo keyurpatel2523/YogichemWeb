@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { db } from '../../../../../server/db';
-import { products, productImages, supplierProducts } from '@shared/schema';
+import { products, productImages, supplierProducts, categories } from '@shared/schema';
 import { eq, desc } from 'drizzle-orm';
 
 export async function GET(request: NextRequest) {
@@ -14,6 +14,10 @@ export async function GET(request: NextRequest) {
       .from(products)
       .orderBy(desc(products.createdAt));
 
+    // Fetch all categories once for lookup
+    const allCategories = await db.select().from(categories);
+    const catMap = new Map(allCategories.map((c) => [c.id, c]));
+
     const productsWithImages = await Promise.all(
       allProducts.map(async (product) => {
         const images = await db
@@ -21,10 +25,26 @@ export async function GET(request: NextRequest) {
           .from(productImages)
           .where(eq(productImages.productId, product.id))
           .limit(1);
-        
+
+        // Build category breadcrumb
+        let categoryName: string | null = null;
+        let parentCategoryName: string | null = null;
+        if (product.categoryId) {
+          const cat = catMap.get(product.categoryId);
+          if (cat) {
+            categoryName = cat.name;
+            if (cat.parentId) {
+              const parent = catMap.get(cat.parentId);
+              parentCategoryName = parent?.name ?? null;
+            }
+          }
+        }
+
         return {
           ...product,
           image: images[0]?.url || null,
+          categoryName,
+          parentCategoryName,
         };
       })
     );
