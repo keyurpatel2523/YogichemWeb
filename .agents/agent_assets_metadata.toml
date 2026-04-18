@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "okk4Dvuy2x6oWqhHcRNqv"
+uri = "file://Yogichem-Admin-Website-Guide.md"
+type = "text"
+title = "Yogichem — Admin & Website Guide"
