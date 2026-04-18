@@ -20,7 +20,7 @@ export default function AdminProductsPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const authHeaders = token ? { Authorization: `Bearer ${token}` } : {};
+  const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
 
   const { data: products, isLoading } = useQuery({
     queryKey: ['admin', 'products'],
