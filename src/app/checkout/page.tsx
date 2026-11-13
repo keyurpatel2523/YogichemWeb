@@ -8,59 +8,10 @@ import { CreditCard, Truck, MapPin, Clock, CheckCircle, AlertCircle, BookUser } 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { formatPrice, isNextDayDeliveryAvailable, generateOrderNumber } from '@/lib/utils';
+import { formatPrice, isNextDayDeliveryAvailable } from '@/lib/utils';
+import { shippingForMethod } from '@/lib/order-pricing';
 import { useCartStore, useUserStore } from '@/lib/store';
 import { toast } from '@/hooks/use-toast';
-
-function luhnCheck(num: string): boolean {
-  const digits = num.replace(/\D/g, '');
-  if (digits.length < 13) return false;
-  let sum = 0;
-  let alternate = false;
-  for (let i = digits.length - 1; i >= 0; i--) {
-    let n = parseInt(digits[i], 10);
-    if (alternate) {
-      n *= 2;
-      if (n > 9) n -= 9;
-    }
-    sum += n;
-    alternate = !alternate;
-  }
-  return sum % 10 === 0;
-}
-
-function detectCardType(num: string): { type: string; logo: string; cvvLen: number } {
-  const n = num.replace(/\D/g, '');
-  if (/^4/.test(n)) return { type: 'Visa', logo: '💳 Visa', cvvLen: 3 };
-  if (/^5[1-5]/.test(n) || /^2[2-7]/.test(n)) return { type: 'Mastercard', logo: '💳 Mastercard', cvvLen: 3 };
-  if (/^3[47]/.test(n)) return { type: 'Amex', logo: '💳 Amex', cvvLen: 4 };
-  if (/^6(?:011|5)/.test(n)) return { type: 'Discover', logo: '💳 Discover', cvvLen: 3 };
-  return { type: '', logo: '', cvvLen: 3 };
-}
-
-function formatCardNumber(value: string): string {
-  const digits = value.replace(/\D/g, '').slice(0, 16);
-  return digits.replace(/(.{4})/g, '$1 ').trim();
-}
-
-function formatExpiry(value: string): string {
-  const digits = value.replace(/\D/g, '').slice(0, 4);
-  if (digits.length >= 3) return digits.slice(0, 2) + '/' + digits.slice(2);
-  return digits;
-}
-
-function validateExpiry(value: string): string {
-  const parts = value.split('/');
-  if (parts.length !== 2) return 'Enter expiry as MM/YY';
-  const month = parseInt(parts[0], 10);
-  const year = parseInt('20' + parts[1], 10);
-  if (isNaN(month) || month < 1 || month > 12) return 'Invalid month';
-  const now = new Date();
-  const expDate = new Date(year, month - 1, 1);
-  const firstOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  if (expDate < firstOfThisMonth) return 'Card has expired';
-  return '';
-}
 
 function FieldError({ msg }: { msg: string }) {
   if (!msg) return null;
@@ -74,11 +25,15 @@ function FieldError({ msg }: { msg: string }) {
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, getTotal, clearCart } = useCartStore();
-  const { user, token, isAuthenticated } = useUserStore();
+  const { user, isAuthenticated } = useUserStore();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
+  const [emailSent, setEmailSent] = useState(false);
+  const [serverTotal, setServerTotal] = useState<number | null>(null);
+  const [couponCode, setCouponCode] = useState('');
+  const [discount, setDiscount] = useState(0);
 
   const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
@@ -98,21 +53,12 @@ export default function CheckoutPage() {
   const [addressErrors, setAddressErrors] = useState<Record<string, string>>({});
 
   const [deliveryMethod, setDeliveryMethod] = useState('standard');
-  const [paymentMethod, setPaymentMethod] = useState('card');
-
-  const [card, setCard] = useState({
-    number: '',
-    expiry: '',
-    cvv: '',
-    name: '',
-  });
-  const [cardErrors, setCardErrors] = useState<Record<string, string>>({});
-  const [cardInfo, setCardInfo] = useState({ type: '', logo: '', cvvLen: 3 });
 
   const subtotal = getTotal();
   const nextDayAvailable = isNextDayDeliveryAvailable();
-  const shippingCost = deliveryMethod === 'nextday' ? 4.95 : subtotal >= 25 ? 0 : 3.50;
-  const total = subtotal + shippingCost;
+  const shippingQuote = shippingForMethod(deliveryMethod, subtotal);
+  const shippingCost = shippingQuote.ok ? shippingQuote.cost : 0;
+  const total = Math.max(0, subtotal - discount + shippingCost);
 
   const applyAddress = (addr: any, phone?: string) => {
     setShippingAddress({
@@ -140,14 +86,25 @@ export default function CheckoutPage() {
       return;
     }
 
-    if (!token) return;
+    
+    const savedCoupon = window.sessionStorage.getItem('yc-coupon') || '';
+    if (savedCoupon) {
+      setCouponCode(savedCoupon);
+      fetch(`/api/coupons/validate?code=${encodeURIComponent(savedCoupon)}&amount=${getTotal()}`)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.valid) setDiscount(Number(data.discount) || 0);
+          else window.sessionStorage.removeItem('yc-coupon');
+        })
+        .catch(() => undefined);
+    }
 
     // Fetch profile phone and saved addresses in parallel
     Promise.all([
-      fetch('/api/auth/profile', { headers: { Authorization: `Bearer ${token}` } })
+      fetch('/api/auth/profile')
         .then((r) => r.ok ? r.json() : null)
         .catch(() => null),
-      fetch('/api/addresses', { headers: { Authorization: `Bearer ${token}` } })
+      fetch('/api/addresses')
         .then((r) => r.ok ? r.json() : [])
         .catch(() => []),
     ]).then(([profile, addrs]) => {
@@ -197,43 +154,15 @@ export default function CheckoutPage() {
     return Object.keys(errors).length === 0;
   };
 
-  const validateCard = (): boolean => {
-    const errors: Record<string, string> = {};
-    const digits = card.number.replace(/\D/g, '');
-    if (!digits) {
-      errors.number = 'Card number is required';
-    } else if (digits.length < 13 || digits.length > 19) {
-      errors.number = 'Enter a valid card number';
-    } else if (!luhnCheck(digits)) {
-      errors.number = 'Invalid card number';
-    }
-    if (!card.expiry) {
-      errors.expiry = 'Expiry date is required';
-    } else {
-      const expiryErr = validateExpiry(card.expiry);
-      if (expiryErr) errors.expiry = expiryErr;
-    }
-    const cvvDigits = card.cvv.replace(/\D/g, '');
-    if (!cvvDigits) {
-      errors.cvv = 'CVV is required';
-    } else if (cvvDigits.length !== cardInfo.cvvLen) {
-      errors.cvv = `CVV must be ${cardInfo.cvvLen} digits`;
-    }
-    if (!card.name.trim()) {
-      errors.name = 'Name on card is required';
-    } else if (card.name.trim().split(' ').length < 2) {
-      errors.name = 'Enter your full name as shown on card';
-    }
-    setCardErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
   const handleContinueToDelivery = () => {
     if (validateAddress()) setStep(2);
   };
 
   const handleSubmitOrder = async () => {
-    if (paymentMethod === 'card' && !validateCard()) return;
+    if (!shippingQuote.ok) {
+      toast({ title: 'Delivery unavailable', description: shippingQuote.error });
+      return;
+    }
 
     setLoading(true);
     try {
@@ -241,23 +170,16 @@ export default function CheckoutPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({
           items: items.map((item) => ({
             productId: item.productId,
-            name: item.name,
-            price: item.price,
             quantity: item.quantity,
             variantId: item.variantId,
           })),
           shippingAddress,
           deliveryMethod,
-          paymentMethod,
-          subtotal,
-          shippingCost,
-          discount: 0,
-          total,
+          couponCode: couponCode || undefined,
         }),
       });
 
@@ -265,9 +187,12 @@ export default function CheckoutPage() {
       if (!res.ok) throw new Error(data.error || 'Failed to create order');
 
       setOrderNumber(data.orderNumber);
+      setEmailSent(Boolean(data.emailSent));
+      setServerTotal(typeof data.total === 'number' ? data.total : null);
       setOrderComplete(true);
       clearCart();
-      toast({ title: 'Order placed!', description: `Order ${data.orderNumber} confirmed.` });
+      window.sessionStorage.removeItem('yc-coupon');
+      toast({ title: 'Order saved', description: `Order ${data.orderNumber} is unpaid. No payment was taken.` });
     } catch (error: any) {
       toast({ title: 'Error', description: error.message || 'Failed to place order. Please try again.' });
     } finally {
@@ -286,14 +211,19 @@ export default function CheckoutPage() {
         <div className="bg-green-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
           <CheckCircle className="w-10 h-10 text-green-600" />
         </div>
-        <h1 className="text-2xl font-bold mb-2">Order Confirmed!</h1>
-        <p className="text-gray-600 mb-4">Thank you for your order.</p>
+        <h1 className="text-2xl font-bold mb-2">Order saved</h1>
+        <p className="text-gray-600 mb-4">Your order is recorded and waiting for payment. No payment has been taken.</p>
         <Card className="text-left mb-6">
           <CardContent className="p-6">
             <p className="text-sm text-gray-600">Order number</p>
             <p className="text-xl font-bold text-boots-blue mb-4">{orderNumber}</p>
+            {serverTotal != null && (
+              <p className="text-sm text-gray-600 mb-2">Total due: {formatPrice(serverTotal)}</p>
+            )}
             <p className="text-sm text-gray-600">
-              We've sent a confirmation email to {shippingAddress.email}
+              {emailSent
+                ? `A summary email was sent to ${shippingAddress.email}.`
+                : 'A confirmation email was not sent. Email delivery is not configured, or the provider rejected it.'}
             </p>
           </CardContent>
         </Card>
@@ -318,7 +248,7 @@ export default function CheckoutPage() {
               {s}
             </div>
             <span className={step >= s ? 'font-medium' : 'text-gray-500'}>
-              {s === 1 ? 'Shipping' : s === 2 ? 'Delivery' : 'Payment'}
+              {s === 1 ? 'Shipping' : s === 2 ? 'Delivery' : 'Review'}
             </span>
           </div>
         ))}
@@ -533,7 +463,7 @@ export default function CheckoutPage() {
 
                 <div className="flex gap-4">
                   <Button variant="outline" onClick={() => setStep(1)}>Back</Button>
-                  <Button onClick={() => setStep(3)} className="flex-1">Continue to Payment</Button>
+                  <Button onClick={() => setStep(3)} className="flex-1">Review order</Button>
                 </div>
               </CardContent>
             </Card>
@@ -544,117 +474,20 @@ export default function CheckoutPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <CreditCard className="w-5 h-5" />
-                  Payment Method
+                  Review order
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <label className={`block p-4 border rounded-lg cursor-pointer ${paymentMethod === 'card' ? 'border-boots-blue bg-blue-50' : ''}`}>
-                  <input type="radio" name="payment" value="card" checked={paymentMethod === 'card'} onChange={(e) => setPaymentMethod(e.target.value)} className="sr-only" />
-                  <div className="flex items-center gap-3">
-                    <CreditCard className="w-6 h-6" />
-                    <span className="font-medium">Credit / Debit Card</span>
-                    <div className="ml-auto flex gap-2 text-xs text-gray-500">
-                      <span className="border px-1 rounded">VISA</span>
-                      <span className="border px-1 rounded">MC</span>
-                      <span className="border px-1 rounded">AMEX</span>
-                    </div>
-                  </div>
-                </label>
-
-                {paymentMethod === 'card' && (
-                  <div className="space-y-3 p-4 bg-gray-50 rounded-lg border">
-                    <div>
-                      <div className="relative">
-                        <input
-                          className={inputClass(cardErrors.number)}
-                          placeholder="Card number"
-                          inputMode="numeric"
-                          maxLength={19}
-                          value={card.number}
-                          onChange={(e) => {
-                            const formatted = formatCardNumber(e.target.value);
-                            setCard({ ...card, number: formatted });
-                            const info = detectCardType(formatted);
-                            setCardInfo(info);
-                            if (cardErrors.number) setCardErrors({ ...cardErrors, number: '' });
-                          }}
-                        />
-                        {cardInfo.type && (
-                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-600">
-                            {cardInfo.type}
-                          </span>
-                        )}
-                      </div>
-                      <FieldError msg={cardErrors.number} />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <input
-                          className={inputClass(cardErrors.expiry)}
-                          placeholder="MM/YY"
-                          inputMode="numeric"
-                          maxLength={5}
-                          value={card.expiry}
-                          onChange={(e) => {
-                            const formatted = formatExpiry(e.target.value);
-                            setCard({ ...card, expiry: formatted });
-                            if (cardErrors.expiry) setCardErrors({ ...cardErrors, expiry: '' });
-                          }}
-                        />
-                        <FieldError msg={cardErrors.expiry} />
-                      </div>
-                      <div>
-                        <input
-                          className={inputClass(cardErrors.cvv)}
-                          placeholder={`CVV (${cardInfo.cvvLen} digits)`}
-                          inputMode="numeric"
-                          maxLength={cardInfo.cvvLen}
-                          type="password"
-                          value={card.cvv}
-                          onChange={(e) => {
-                            const v = e.target.value.replace(/\D/g, '').slice(0, cardInfo.cvvLen);
-                            setCard({ ...card, cvv: v });
-                            if (cardErrors.cvv) setCardErrors({ ...cardErrors, cvv: '' });
-                          }}
-                        />
-                        <FieldError msg={cardErrors.cvv} />
-                      </div>
-                    </div>
-
-                    <div>
-                      <input
-                        className={inputClass(cardErrors.name)}
-                        placeholder="Name on card"
-                        value={card.name}
-                        onChange={(e) => {
-                          setCard({ ...card, name: e.target.value });
-                          if (cardErrors.name) setCardErrors({ ...cardErrors, name: '' });
-                        }}
-                      />
-                      <FieldError msg={cardErrors.name} />
-                    </div>
-
-                    <div className="flex items-center gap-2 pt-1">
-                      <div className="w-4 h-4 text-green-600">🔒</div>
-                      <p className="text-xs text-gray-500">Your card details are encrypted and secure</p>
-                    </div>
-                  </div>
+                <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+                  Card and PayPal payments are not connected. Placing this order saves it as unpaid. The server calculates the product prices, delivery, and any coupon. No card details are collected.
+                </div>
+                {couponCode && (
+                  <p className="text-sm text-gray-600">Coupon {couponCode} will be checked again when the order is saved.</p>
                 )}
-
-                <label className={`block p-4 border rounded-lg cursor-pointer ${paymentMethod === 'paypal' ? 'border-boots-blue bg-blue-50' : ''}`}>
-                  <input type="radio" name="payment" value="paypal" checked={paymentMethod === 'paypal'} onChange={(e) => setPaymentMethod(e.target.value)} className="sr-only" />
-                  <div className="flex items-center gap-3">
-                    <span className="text-blue-700 font-bold text-lg">Pay</span>
-                    <span className="text-blue-400 font-bold text-lg">Pal</span>
-                    <span className="font-medium text-sm text-gray-700">Pay with PayPal</span>
-                  </div>
-                </label>
-
                 <div className="flex gap-4">
                   <Button variant="outline" onClick={() => setStep(2)}>Back</Button>
-                  <Button onClick={handleSubmitOrder} className="flex-1" disabled={loading}>
-                    {loading ? 'Processing...' : `Pay ${formatPrice(total)}`}
+                  <Button onClick={handleSubmitOrder} className="flex-1" disabled={loading || !shippingQuote.ok}>
+                    {loading ? 'Saving...' : `Place unpaid order ${formatPrice(total)}`}
                   </Button>
                 </div>
               </CardContent>
@@ -693,10 +526,17 @@ export default function CheckoutPage() {
                   <span>Subtotal</span>
                   <span>{formatPrice(subtotal)}</span>
                 </div>
+                {discount > 0 && (
+                  <div className="flex justify-between text-green-700">
+                    <span>Discount{couponCode ? ` (${couponCode})` : ''}</span>
+                    <span>-{formatPrice(discount)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span>Shipping</span>
                   <span>{shippingCost === 0 ? 'FREE' : formatPrice(shippingCost)}</span>
                 </div>
+                <p className="text-xs text-gray-500">The saved order total is calculated on the server.</p>
                 <div className="flex justify-between text-lg font-bold pt-2 border-t">
                   <span>Total</span>
                   <span className="text-boots-blue">{formatPrice(total)}</span>

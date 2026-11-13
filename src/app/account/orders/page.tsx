@@ -37,7 +37,7 @@ const statusConfig: Record<string, { icon: any; color: string; label: string }> 
 
 export default function OrdersPage() {
   const router = useRouter();
-  const { user, token, isAuthenticated } = useUserStore();
+  const { user, isAuthenticated } = useUserStore();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -50,7 +50,6 @@ export default function OrdersPage() {
     const fetchOrders = async () => {
       try {
         const res = await fetch('/api/orders', {
-          headers: { Authorization: `Bearer ${token}` },
         });
         if (res.ok) {
           const data = await res.json();
@@ -64,7 +63,7 @@ export default function OrdersPage() {
     };
 
     fetchOrders();
-  }, [isAuthenticated, router, token]);
+  }, [isAuthenticated, router]);
 
   if (!user) {
     return null;

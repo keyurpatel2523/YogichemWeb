@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { useAdminStore } from '@/lib/admin-store';
 import { useToast } from '@/hooks/use-toast';
 
 interface Category {
@@ -48,7 +47,6 @@ function generateSlug(name: string) {
 }
 
 export default function AdminSubcategoriesPage() {
-  const { token } = useAdminStore();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
@@ -56,7 +54,7 @@ export default function AdminSubcategoriesPage() {
   const [form, setForm] = useState<SubForm>(emptyForm);
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
 
-  const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
+  const headers = { 'Content-Type': 'application/json' };
 
   const { data: allCategories = [], isLoading } = useQuery<Category[]>({
     queryKey: ['admin', 'categories'],

@@ -34,6 +34,7 @@ export default function CartPage() {
       if (data.valid) {
         setDiscount(data.discount);
         setAppliedCoupon(couponCode.toUpperCase());
+        window.sessionStorage.setItem('yc-coupon', couponCode.toUpperCase());
         toast({ title: 'Coupon applied!', description: `You saved ${formatPrice(data.discount)}` });
       } else {
         toast({ title: 'Invalid coupon', description: data.error });

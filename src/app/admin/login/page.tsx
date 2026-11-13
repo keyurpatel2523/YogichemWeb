@@ -37,7 +37,7 @@ export default function AdminLoginPage() {
         return;
       }
 
-      setAdmin(data.admin, data.token);
+      setAdmin(data.admin);
       router.push('/admin');
     } catch (err) {
       setError('Something went wrong. Please try again.');

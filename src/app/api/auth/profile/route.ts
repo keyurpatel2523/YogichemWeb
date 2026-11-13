@@ -3,6 +3,8 @@ import { db } from '../../../../../server/db';
 import { users } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 import { getUserFromRequest, signToken } from '@/lib/auth';
+import { validatePassword } from '@/lib/password';
+import { CUSTOMER_COOKIE, CUSTOMER_MAX_AGE, sessionCookieOptions } from '@/lib/auth-cookie';
 import bcrypt from 'bcryptjs';
 
 export async function GET(request: NextRequest) {
@@ -60,7 +62,9 @@ export async function PATCH(request: NextRequest) {
       if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
       const valid = await bcrypt.compare(currentPassword, user.password);
       if (!valid) return NextResponse.json({ error: 'Current password is incorrect' }, { status: 400 });
-      updateData.password = await bcrypt.hash(newPassword, 10);
+      const passwordError = validatePassword(newPassword);
+      if (passwordError) return NextResponse.json({ error: passwordError }, { status: 400 });
+      updateData.password = await bcrypt.hash(newPassword, 12);
     }
 
     const [updated] = await db
@@ -77,8 +81,9 @@ export async function PATCH(request: NextRequest) {
       });
 
     const newToken = signToken({ userId: updated.id, email: updated.email });
-
-    return NextResponse.json({ user: updated, token: newToken });
+    const response = NextResponse.json({ user: updated });
+    response.cookies.set(CUSTOMER_COOKIE, newToken, sessionCookieOptions(CUSTOMER_MAX_AGE));
+    return response;
   } catch (error) {
     console.error('Profile update error:', error);
     return NextResponse.json({ error: 'Failed to update profile' }, { status: 500 });

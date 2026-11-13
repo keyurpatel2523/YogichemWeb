@@ -7,11 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useAdminStore } from '@/lib/admin-store';
 import { toast } from '@/hooks/use-toast';
 
 export default function AdminPromotionsPage() {
-  const { token } = useAdminStore();
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
@@ -28,7 +26,6 @@ export default function AdminPromotionsPage() {
     queryKey: ['admin', 'coupons'],
     queryFn: async () => {
       const res = await fetch('/api/admin/coupons', {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (!res.ok) throw new Error('Failed to fetch coupons');
       return res.json();
@@ -43,7 +40,6 @@ export default function AdminPromotionsPage() {
         method,
         headers: {
           'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify(body),
       });
@@ -63,7 +59,6 @@ export default function AdminPromotionsPage() {
     mutationFn: async (id: number) => {
       const res = await fetch(`/api/admin/coupons?id=${id}`, {
         method: 'DELETE',
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (!res.ok) throw new Error('Failed to delete coupon');
       return res.json();

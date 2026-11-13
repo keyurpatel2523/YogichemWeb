@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { isNextDayAvailable } from '@/lib/order-pricing';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -42,9 +43,7 @@ export function calculateDiscount(original: number, sale: number): number {
 }
 
 export function isNextDayDeliveryAvailable(): boolean {
-  const now = new Date();
-  const cutoffHour = 14;
-  return now.getHours() < cutoffHour;
+  return isNextDayAvailable();
 }
 
 export function getEstimatedDeliveryDate(daysToAdd: number): Date {

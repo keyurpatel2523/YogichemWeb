@@ -142,8 +142,7 @@ interface UserStore {
     isWholesaler: boolean;
     walletBalance: string;
   } | null;
-  token: string | null;
-  setUser: (user: UserStore['user'], token: string) => void;
+  setUser: (user: UserStore['user']) => void;
   logout: () => void;
   isAuthenticated: () => boolean;
 }
@@ -152,11 +151,21 @@ export const useUserStore = create<UserStore>()(
   persist(
     (set, get) => ({
       user: null,
-      token: null,
-      setUser: (user, token) => set({ user, token }),
-      logout: () => set({ user: null, token: null }),
-      isAuthenticated: () => get().token !== null,
+      setUser: (user) => set({ user }),
+      logout: () => {
+        set({ user: null });
+        void fetch('/api/auth/logout', { method: 'POST' });
+      },
+      isAuthenticated: () => get().user !== null,
     }),
-    { name: 'user-storage' }
+    {
+      name: 'user-storage',
+      version: 2,
+      partialize: (state) => ({ user: state.user }),
+      migrate: (persisted) => {
+        const state = persisted as { user?: UserStore['user'] } | undefined;
+        return { user: state?.user ?? null };
+      },
+    }
   )
 );

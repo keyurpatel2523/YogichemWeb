@@ -1,13 +1,22 @@
 /** @type {import('next').NextConfig} */
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+const allowedOrigins = siteUrl
+  ? [new URL(siteUrl).host, `www.${new URL(siteUrl).host}`]
+  : ['localhost:3000'];
+
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['images.unsplash.com', 'via.placeholder.com'],
     unoptimized: true,
+    remotePatterns: [
+      { protocol: 'https', hostname: 'images.unsplash.com' },
+      { protocol: 'https', hostname: 'via.placeholder.com' },
+      { protocol: 'https', hostname: '*.public.blob.vercel-storage.com' },
+    ],
   },
   experimental: {
     serverActions: {
-      allowedOrigins: ['*'],
+      allowedOrigins,
     },
   },
   async redirects() {
@@ -24,10 +33,11 @@ const nextConfig = {
       {
         source: '/:path*',
         headers: [
-          {
-            key: 'Cache-Control',
-            value: 'no-cache, no-store, must-revalidate',
-          },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+          { key: 'X-DNS-Prefetch-Control', value: 'on' },
         ],
       },
     ];

@@ -41,7 +41,7 @@ export default function RegisterPage() {
         throw new Error(data.error || 'Registration failed');
       }
 
-      setUser(data.user, data.token);
+      setUser(data.user);
       toast({ title: 'Account created!', description: 'Welcome to Yogichem!' });
       router.push('/account');
     } catch (error: any) {
@@ -105,6 +105,7 @@ export default function RegisterPage() {
                   required
                   minLength={8}
                 />
+                <p className="text-xs text-gray-500 mt-1">At least 8 characters, including a letter and a number.</p>
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}

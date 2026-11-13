@@ -7,7 +7,6 @@ import { ArrowLeft, Save, Loader2, Truck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAdminStore } from '@/lib/admin-store';
 import { toast } from '@/hooks/use-toast';
 import { ImageUpload } from '@/components/admin/ImageUpload';
 import { CategoryCascadeSelect } from '@/components/admin/CategoryCascadeSelect';
@@ -23,7 +22,6 @@ function generateSlug(name: string): string {
 
 export default function AdminAddProductPage() {
   const router = useRouter();
-  const { token } = useAdminStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [suppliersList, setSuppliersList] = useState<any[]>([]);
 
@@ -58,12 +56,11 @@ export default function AdminAddProductPage() {
 
   useEffect(() => {
     fetch('/api/admin/suppliers', {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
     })
       .then((res) => res.json())
       .then((data) => setSuppliersList(Array.isArray(data) ? data.filter((s: any) => s.isActive) : []))
       .catch(() => {});
-  }, [token]);
+  }, []);
 
   const handleNameChange = (value: string) => {
     setForm((prev) => ({
@@ -111,7 +108,6 @@ export default function AdminAddProductPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(data),
       });

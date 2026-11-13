@@ -38,20 +38,20 @@ export async function PATCH(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { orderId, status, paymentStatus } = body;
+    const { orderId, status } = body;
 
     if (!orderId) {
       return NextResponse.json({ error: 'Order ID required' }, { status: 400 });
     }
 
-    const updateData: any = {};
-    if (status) updateData.status = status;
-    if (paymentStatus) updateData.paymentStatus = paymentStatus;
-    updateData.updatedAt = new Date();
+    const allowedStatuses = new Set(['pending', 'processing', 'shipped', 'delivered', 'cancelled']);
+    if (!status || !allowedStatuses.has(status)) {
+      return NextResponse.json({ error: 'A valid order status is required' }, { status: 400 });
+    }
 
     const [updatedOrder] = await db
       .update(orders)
-      .set(updateData)
+      .set({ status, updatedAt: new Date() })
       .where(eq(orders.id, orderId))
       .returning();
 

@@ -7,13 +7,14 @@ import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { safeRedirectPath } from '@/lib/redirect';
 import { useUserStore } from '@/lib/store';
 import { toast } from '@/hooks/use-toast';
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get('redirect') || '/account';
+  const redirectTo = safeRedirectPath(searchParams.get('redirect'), '/account');
   const setUser = useUserStore((state) => state.setUser);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -39,7 +40,7 @@ function LoginForm() {
         throw new Error(data.error || 'Login failed');
       }
 
-      setUser(data.user, data.token);
+      setUser(data.user);
       toast({ title: 'Welcome back!', description: `Hello, ${data.user.firstName}!` });
       router.push(redirectTo);
     } catch (error: any) {

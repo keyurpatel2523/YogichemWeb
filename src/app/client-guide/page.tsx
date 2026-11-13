@@ -1,5 +1,7 @@
 'use client';
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://yogichem.co.uk';
+
 export default function ClientGuidePage() {
   return (
     <>
@@ -63,7 +65,7 @@ export default function ClientGuidePage() {
         {/* PART 1 — WEBSITE */}
         <div className="page-break" />
         <PartHeading number="Part 1" title="Website — Customer Facing" color="#003DA5" />
-        <InfoBox label="Website URL" value="https://yogichem.replit.app" />
+        <InfoBox label="Website URL" value={SITE_URL} />
 
         <Section title="All Website Pages">
           <Table
@@ -133,17 +135,10 @@ export default function ClientGuidePage() {
         {/* PART 2 — ADMIN LOGIN */}
         <div className="page-break" />
         <PartHeading number="Part 2" title="Admin Dashboard Login" color="#003DA5" />
-        <InfoBox label="Admin Login URL" value="https://yogichem.replit.app/admin/login" />
-        <Table
-          headers={['Field', 'Value']}
-          rows={[
-            ['Email', 'admin@yogichem.com'],
-            ['Password', 'admin123'],
-          ]}
-        />
-        <div style={{ background: '#fff8e1', border: '1px solid #f59e0b', borderRadius: 6, padding: '10px 14px', marginTop: 12, fontSize: 12, color: '#92400e' }}>
-          <strong>Security Notice:</strong> Please change the default admin password after your first login. Go to Admin → Settings.
-        </div>
+        <InfoBox label="Admin Login URL" value={`${SITE_URL}/admin/login`} />
+        <p style={{ color: '#555', marginBottom: 12 }}>
+          Admin accounts are created with the server command <code>npm run admin:create</code>. There is no default password.
+        </p>
 
         {/* PART 3 — DASHBOARD */}
         <PartHeading number="Part 3" title="Dashboard Overview" color="#003DA5" />
@@ -411,11 +406,11 @@ export default function ClientGuidePage() {
         {/* PART 13 — EMAILS */}
         <div className="page-break" />
         <PartHeading number="Part 13" title="Automatic Order Emails" color="#003DA5" />
-        <p style={{ color: '#555', marginBottom: 12 }}>Every time a customer places an order, two emails are sent automatically — one to the customer and one to the admin.</p>
+        <p style={{ color: '#555', marginBottom: 12 }}>When SendGrid is configured, an order summary is emailed to the customer and BCC'd to the admin address. The message says payment has not been taken. If SendGrid is not configured, the order is still saved and no email is sent.</p>
 
         <Section title="Customer Email Contains">
           <ul style={{ paddingLeft: 20, color: '#555', margin: 0 }}>
-            {['Order number', 'Full list of items ordered with quantities and prices', 'Delivery address', 'Delivery method chosen (Standard / Next Day / Click & Collect)', 'Payment method', 'Subtotal, shipping cost, discount applied, and grand total', '"View Your Order" button linking to their account'].map(i => (
+            {['Order number', 'Full list of items ordered with quantities and prices', 'Delivery address', 'Delivery method chosen (Standard / Next Day / Click & Collect)', 'Notice that payment has not been taken', 'Subtotal, shipping cost, discount applied, and grand total', '"View Your Order" button linking to their account'].map(i => (
               <li key={i} style={{ marginBottom: 4 }}>{i}</li>
             ))}
           </ul>
@@ -424,12 +419,12 @@ export default function ClientGuidePage() {
         <Table
           headers={['Setting', 'Value']}
           rows={[
-            ['Email sent from', 'keyursuhani1530@gmail.com'],
-            ['Customer receives', 'Full order confirmation at the email entered at checkout'],
-            ['Admin receives', 'A BCC copy of every order to keyursuhani1530@gmail.com'],
+            ['Email sent from', 'SENDGRID_FROM_EMAIL'],
+            ['Customer receives', 'An order summary at the email entered at checkout, when SendGrid is configured'],
+            ['Admin receives', 'A BCC copy when ADMIN_EMAIL is set and SendGrid accepts the message'],
           ]}
         />
-        <p style={{ color: '#555', marginTop: 8, fontSize: 12 }}>To change the admin notification email, update the ADMIN_EMAIL setting in the Replit Secrets panel.</p>
+        <p style={{ color: '#555', marginTop: 8, fontSize: 12 }}>Set SENDGRID_FROM_EMAIL and ADMIN_EMAIL in the server environment. There is no hardcoded from-address.</p>
 
         {/* PART 14 — QUICK REFERENCE */}
         <div className="page-break" />
@@ -439,9 +434,9 @@ export default function ClientGuidePage() {
           <Table
             headers={['Purpose', 'URL']}
             rows={[
-              ['Website', 'https://yogichem.replit.app'],
-              ['Admin Dashboard', 'https://yogichem.replit.app/admin'],
-              ['Admin Login', 'https://yogichem.replit.app/admin/login'],
+              ['Website', SITE_URL],
+              ['Admin Dashboard', `${SITE_URL}/admin`],
+              ['Admin Login', `${SITE_URL}/admin/login`],
             ]}
           />
         </Section>

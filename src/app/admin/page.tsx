@@ -5,7 +5,6 @@ import { Package, Users, ShoppingCart, DollarSign, TrendingUp, AlertTriangle } f
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatPrice } from '@/lib/utils';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { useAdminStore } from '@/lib/admin-store';
 
 const categorySales = [
   { name: 'Beauty', value: 35 },
@@ -18,13 +17,11 @@ const categorySales = [
 const COLORS = ['#003DA5', '#00A19A', '#E31837', '#FF6B00', '#00A550'];
 
 export default function AdminDashboard() {
-  const { token } = useAdminStore();
 
   const { data: stats, isLoading } = useQuery({
     queryKey: ['admin', 'stats'],
     queryFn: async () => {
       const res = await fetch('/api/admin/stats', {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (!res.ok) throw new Error('Failed to fetch stats');
       return res.json();

@@ -34,7 +34,7 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean
 
 export default function NotificationsPage() {
   const router = useRouter();
-  const { token, isAuthenticated } = useUserStore();
+  const { isAuthenticated } = useUserStore();
   const [prefs, setPrefs] = useState<Prefs>({ emailNotifications: true, whatsappNotifications: false });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -44,19 +44,19 @@ export default function NotificationsPage() {
       router.push('/login?redirect=/account/notifications');
       return;
     }
-    fetch('/api/notifications', { headers: { Authorization: `Bearer ${token}` } })
+    fetch('/api/notifications')
       .then((r) => r.json())
       .then((d) => setPrefs({ emailNotifications: d.emailNotifications ?? true, whatsappNotifications: d.whatsappNotifications ?? false }))
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [isAuthenticated, router, token]);
+  }, [isAuthenticated, router]);
 
   const handleSave = async () => {
     setSaving(true);
     try {
       const res = await fetch('/api/notifications', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(prefs),
       });
       if (!res.ok) throw new Error('Failed to save');

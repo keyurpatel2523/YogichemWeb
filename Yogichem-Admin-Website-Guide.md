@@ -8,7 +8,7 @@
 
 ### Website URL
 ```
-https://yogichem.replit.app
+https://yogichem.co.uk
 ```
 
 ---
@@ -78,14 +78,14 @@ https://yogichem.replit.app
 
 ### Admin Login URL
 ```
-https://yogichem.replit.app/admin/login
+https://yogichem.co.uk/admin/login
 ```
 
 ### Admin Login Credentials
 | Field | Value |
 |-------|-------|
 | Email | `admin@yogichem.com` |
-| Password | `admin123` |
+| Password | Created with `npm run admin:create`. No default password. |
 
 > **Important:** Change this password after first login for security.
 
@@ -396,10 +396,10 @@ Every time a customer places an order:
 
 2. **Admin receives** a copy (BCC) of the same email so you're always notified of new orders.
 
-**Email sent from:** `keyursuhani1530@gmail.com`
-**Admin copy sent to:** `keyursuhani1530@gmail.com`
+**Email sent from:** the address in `SENDGRID_FROM_EMAIL`
+**Admin copy sent to:** the address in `ADMIN_EMAIL`
 
-> To change the admin notification email, update `ADMIN_EMAIL` in the Replit Secrets panel.
+> Set both values in the production environment. There is no hardcoded from-address.
 
 ---
 
@@ -409,15 +409,15 @@ Every time a customer places an order:
 
 | Purpose | URL |
 |---------|-----|
-| Website Homepage | `https://yogichem.replit.app` |
-| Admin Dashboard | `https://yogichem.replit.app/admin` |
-| Admin Login | `https://yogichem.replit.app/admin/login` |
+| Website Homepage | `https://yogichem.co.uk` |
+| Admin Dashboard | `https://yogichem.co.uk/admin` |
+| Admin Login | `https://yogichem.co.uk/admin/login` |
 
 ### Admin Login
 | | |
 |--|--|
 | Email | `admin@yogichem.com` |
-| Password | `admin123` |
+| Password | Created with `npm run admin:create`. No default password. |
 
 ### Adding a New Product (Quick Steps)
 1. Go to **Admin → Products → Add New Product**

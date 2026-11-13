@@ -7,6 +7,7 @@ import { ArrowLeft, User, Lock, Save, CheckCircle, AlertCircle } from 'lucide-re
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useUserStore } from '@/lib/store';
+import { validatePassword } from '@/lib/password';
 import { toast } from '@/hooks/use-toast';
 
 function FieldError({ msg }: { msg: string }) {
@@ -20,7 +21,7 @@ function FieldError({ msg }: { msg: string }) {
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { user, token, setUser, isAuthenticated } = useUserStore();
+  const { user, setUser, isAuthenticated } = useUserStore();
 
   const [profile, setProfile] = useState({
     firstName: '',
@@ -50,7 +51,6 @@ export default function ProfilePage() {
     const fetchProfile = async () => {
       try {
         const res = await fetch('/api/auth/profile', {
-          headers: { Authorization: `Bearer ${token}` },
         });
         if (res.ok) {
           const data = await res.json();
@@ -69,7 +69,7 @@ export default function ProfilePage() {
     };
 
     fetchProfile();
-  }, [isAuthenticated, router, token]);
+  }, [isAuthenticated, router]);
 
   const validateProfile = () => {
     const errors: Record<string, string> = {};
@@ -87,8 +87,9 @@ export default function ProfilePage() {
     if (!passwords.currentPassword) errors.currentPassword = 'Enter your current password';
     if (!passwords.newPassword) {
       errors.newPassword = 'Enter a new password';
-    } else if (passwords.newPassword.length < 8) {
-      errors.newPassword = 'Password must be at least 8 characters';
+    } else {
+      const passwordError = validatePassword(passwords.newPassword);
+      if (passwordError) errors.newPassword = passwordError;
     }
     if (!passwords.confirmPassword) {
       errors.confirmPassword = 'Please confirm your new password';
@@ -107,7 +108,6 @@ export default function ProfilePage() {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           firstName: profile.firstName,
@@ -118,7 +118,7 @@ export default function ProfilePage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to update profile');
-      setUser(data.user, data.token);
+      setUser(data.user);
       toast({ title: 'Profile updated', description: 'Your details have been saved.' });
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
@@ -135,7 +135,6 @@ export default function ProfilePage() {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           currentPassword: passwords.currentPassword,

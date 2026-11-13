@@ -30,11 +30,11 @@ export default function AdminSettingsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Settings</h1>
-          <p className="text-gray-600">Configure your store settings</p>
+          <p className="text-gray-600">These fields are not saved. Store settings are not connected to the database.</p>
         </div>
-        <Button onClick={handleSave}>
+        <Button type="button" disabled>
           <Save className="w-4 h-4 mr-2" />
-          Save Changes
+          Not saved
         </Button>
       </div>
 

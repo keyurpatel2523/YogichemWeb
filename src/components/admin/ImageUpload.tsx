@@ -3,7 +3,6 @@
 import { useState, useRef } from 'react';
 import Image from 'next/image';
 import { Upload, X, ImageIcon, Loader2 } from 'lucide-react';
-import { useAdminStore } from '@/lib/admin-store';
 import { toast } from '@/hooks/use-toast';
 
 interface ImageUploadProps {
@@ -13,7 +12,6 @@ interface ImageUploadProps {
 }
 
 export function ImageUpload({ value, onChange, label = 'Product Image' }: ImageUploadProps) {
-  const { token } = useAdminStore();
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -36,7 +34,6 @@ export function ImageUpload({ value, onChange, label = 'Product Image' }: ImageU
 
       const res = await fetch('/api/admin/upload', {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
         body: formData,
       });
 

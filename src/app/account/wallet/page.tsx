@@ -28,7 +28,7 @@ const typeConfig: Record<string, { icon: any; color: string; label: string; sign
 
 export default function WalletPage() {
   const router = useRouter();
-  const { token, isAuthenticated } = useUserStore();
+  const { isAuthenticated } = useUserStore();
   const [balance, setBalance] = useState('0.00');
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,7 +38,7 @@ export default function WalletPage() {
       router.push('/login?redirect=/account/wallet');
       return;
     }
-    fetch('/api/wallet', { headers: { Authorization: `Bearer ${token}` } })
+    fetch('/api/wallet')
       .then((r) => r.json())
       .then((d) => {
         setBalance(d.balance || '0.00');
@@ -46,7 +46,7 @@ export default function WalletPage() {
       })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [isAuthenticated, router, token]);
+  }, [isAuthenticated, router]);
 
   return (
     <div className="container mx-auto px-4 py-8">

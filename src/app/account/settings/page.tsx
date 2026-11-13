@@ -177,9 +177,13 @@ export default function SettingsPage() {
                       className="flex-1 bg-red-600 hover:bg-red-700 text-white"
                       disabled={deleteInput !== 'DELETE'}
                       onClick={() => {
-                        logout();
-                        router.push('/');
-                        toast({ title: 'Account deleted', description: 'Your account has been removed.' });
+                        setShowDeleteConfirm(false);
+                        setDeleteInput('');
+                        toast({
+                          title: 'Account was not deleted',
+                          description: 'Account deletion is not connected yet. Sign out instead if you want to leave this device.',
+                          variant: 'destructive',
+                        });
                       }}
                     >
                       Permanently Delete

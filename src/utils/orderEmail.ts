@@ -20,6 +20,7 @@ interface OrderEmailData {
   total: string;
   deliveryMethod: string;
   paymentMethod: string;
+  paymentStatus?: string;
 }
 
 function formatPrice(amount: string | number): string {
@@ -141,7 +142,7 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData): Promise<
                   <h3 style="margin:0 0 8px;color:#1a1a1a;font-size:14px;">Delivery</h3>
                   <p style="margin:0;color:#555;font-size:13px;line-height:1.6;">
                     ${deliveryLabel}<br>
-                    <span style="color:#666;">Payment: ${data.paymentMethod === 'card' ? 'Credit/Debit Card' : 'PayPal'}</span>
+                    <span style="color:#666;">Payment: Not taken — this order is unpaid until a payment provider is connected.</span>
                   </p>
                 </td>
                 <td width="4%"></td>
@@ -160,7 +161,7 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData): Promise<
 
             <!-- CTA -->
             <div style="text-align:center;margin:24px 0;">
-              <a href="https://yogichem.com/account/orders" style="display:inline-block;background:#003DA5;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:14px;font-weight:600;">
+              <a href="${(process.env.NEXT_PUBLIC_SITE_URL || 'https://yogichem.co.uk').replace(/\/$/, '')}/account/orders" style="display:inline-block;background:#003DA5;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:14px;font-weight:600;">
                 View Your Order
               </a>
             </div>
@@ -201,7 +202,7 @@ Shipping:   ${shippingDisplay}
 ${parseFloat(data.discount) > 0 ? `Discount:   − ${formatPrice(data.discount)}\n` : ''}Total:      ${formatPrice(data.total)}
 
 Delivery: ${deliveryLabel}
-Payment:  ${data.paymentMethod === 'card' ? 'Credit/Debit Card' : 'PayPal'}
+Payment:  Not taken. This order is unpaid.
 
 Deliver to:
 ${addr.firstName} ${addr.lastName}

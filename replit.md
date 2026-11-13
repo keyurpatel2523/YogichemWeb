@@ -123,7 +123,7 @@ The seeder creates:
 - 16 sample products with images
 - Shipping rules for UK, Ireland, France, Germany, US
 - Coupon codes: SAVE20, WELLNESS15, BABY15, FREESHIP, WELCOME10
-- Admin user: admin@yogichem.com / admin123
+- Admin accounts are created with `npm run admin:create`. There is no default password.
 
 ## URL Structure
 

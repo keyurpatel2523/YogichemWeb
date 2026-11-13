@@ -37,22 +37,30 @@ export async function POST(request: NextRequest) {
       .from(users)
       .where(eq(users.whatsappNotifications, true));
 
-    const recipientCount = sendNow ? recipients.length : 0;
+    const recipientCount = recipients.length;
     const schedDate = !sendNow && scheduledAt ? new Date(scheduledAt) : null;
+    const status = sendNow ? 'recorded' : schedDate ? 'scheduled' : 'draft';
 
     const [broadcast] = await db
       .insert(whatsappBroadcasts)
       .values({
         name: name.trim(),
         message: message.trim(),
-        status: sendNow ? 'sent' : schedDate ? 'scheduled' : 'draft',
+        status,
         scheduledAt: schedDate,
-        sentAt: sendNow ? new Date() : null,
-        recipientCount,
+        sentAt: null,
+        recipientCount: sendNow || schedDate ? recipientCount : 0,
       })
       .returning();
 
-    return NextResponse.json(broadcast, { status: 201 });
+    return NextResponse.json({
+      ...broadcast,
+      warning: sendNow
+        ? 'Broadcast saved. WhatsApp is not connected, so no message was delivered.'
+        : schedDate
+          ? 'Saved with a schedule. Nothing will be sent automatically.'
+          : null,
+    }, { status: 201 });
   } catch (error) {
     console.error('Error creating broadcast:', error);
     return NextResponse.json({ error: 'Failed to create broadcast' }, { status: 500 });

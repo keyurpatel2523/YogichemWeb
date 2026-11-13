@@ -14,11 +14,11 @@ export default function ContactPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSending(true);
-    await new Promise((r) => setTimeout(r, 1000));
-    setSending(false);
-    setSent(true);
-    toast({ title: 'Message sent!', description: 'We\'ll get back to you within 24 hours.' });
+    toast({
+      title: 'Message not sent',
+      description: 'The contact form is not connected to an inbox yet. Please email the store directly.',
+      variant: 'destructive',
+    });
   };
 
   return (
@@ -63,7 +63,10 @@ export default function ContactPage() {
           <div className="lg:col-span-2">
             <Card className="shadow-md">
               <CardContent className="p-8">
-                <h2 className="text-xl font-bold text-[#1A1A3E] mb-6">Send Us a Message</h2>
+                <h2 className="text-xl font-bold text-[#1A1A3E] mb-2">Send Us a Message</h2>
+                <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-3 mb-6">
+                  This form is not connected. Submitting it does not send a message or create a support request.
+                </p>
                 {sent ? (
                   <div className="text-center py-10">
                     <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">

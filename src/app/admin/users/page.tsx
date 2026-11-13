@@ -8,12 +8,10 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { formatPrice, formatDate } from '@/lib/utils';
-import { useAdminStore } from '@/lib/admin-store';
 import { toast } from '@/hooks/use-toast';
 
 export default function AdminUsersPage() {
   const [search, setSearch] = useState('');
-  const { token } = useAdminStore();
   const queryClient = useQueryClient();
 
   const { data: users = [], isLoading } = useQuery({
@@ -23,7 +21,6 @@ export default function AdminUsersPage() {
       if (search) params.set('search', search);
       params.set('limit', '100');
       const res = await fetch(`/api/admin/users?${params}`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (!res.ok) throw new Error('Failed to fetch users');
       return res.json();
@@ -36,7 +33,6 @@ export default function AdminUsersPage() {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({ id, isWholesaler }),
       });

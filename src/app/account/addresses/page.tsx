@@ -50,7 +50,7 @@ function FieldError({ msg }: { msg: string }) {
 
 export default function AddressesPage() {
   const router = useRouter();
-  const { token, isAuthenticated } = useUserStore();
+  const { isAuthenticated } = useUserStore();
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -72,7 +72,6 @@ export default function AddressesPage() {
     setLoading(true);
     try {
       const res = await fetch('/api/addresses', {
-        headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) setAddresses(await res.json());
     } catch (e) {
@@ -103,7 +102,7 @@ export default function AddressesPage() {
       const method = editingId ? 'PATCH' : 'POST';
       const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
       const data = await res.json();
@@ -145,7 +144,6 @@ export default function AddressesPage() {
     try {
       const res = await fetch(`/api/addresses/${id}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error('Failed to delete');
       setAddresses((prev) => prev.filter((a) => a.id !== id));
@@ -161,7 +159,6 @@ export default function AddressesPage() {
     try {
       const res = await fetch(`/api/addresses/${id}`, {
         method: 'PUT',
-        headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error('Failed to set default');
       setAddresses((prev) =>

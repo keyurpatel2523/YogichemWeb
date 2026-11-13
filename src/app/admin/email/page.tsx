@@ -9,7 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useAdminStore } from '@/lib/admin-store';
+import { sanitizeCampaignHtml } from '@/lib/html-sanitize';
 
 const AUDIENCE_OPTIONS = [
   { value: 'all', label: 'All Customers (email notifications on)' },
@@ -32,7 +32,6 @@ const emptyForm = {
 };
 
 export default function AdminEmailPage() {
-  const { token } = useAdminStore();
   const queryClient = useQueryClient();
 
   const [showModal, setShowModal] = useState(false);
@@ -43,7 +42,7 @@ export default function AdminEmailPage() {
   const [preview, setPreview] = useState<any | null>(null);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
 
-  const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+  const authHeaders: Record<string, string> = {};
 
   const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
     setToast({ msg, type });
@@ -82,11 +81,12 @@ export default function AdminEmailPage() {
           scheduledAt: form.scheduleType === 'later' ? form.scheduledAt : null,
         }),
       });
-      if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'Failed'); }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed');
       await queryClient.invalidateQueries({ queryKey: ['admin', 'email-campaigns'] });
       setShowModal(false);
       setForm(emptyForm);
-      showToast(sendNow ? 'Campaign sent successfully!' : form.scheduleType === 'later' ? 'Campaign scheduled!' : 'Campaign saved as draft');
+      showToast(data.warning || (sendNow ? 'Campaign sent' : form.scheduleType === 'later' ? 'Campaign saved with a schedule. It will not be sent automatically.' : 'Campaign saved as draft'));
     } catch (err: any) {
       showToast(err.message || 'Failed to save campaign', 'error');
     } finally {
@@ -280,7 +280,7 @@ export default function AdminEmailPage() {
                   value={form.content}
                   onChange={(e) => setForm({ ...form, content: e.target.value })}
                   rows={8}
-                  placeholder="Write your email message here. You can use basic HTML for formatting, e.g.:&#10;&#10;<h2>Big Summer Sale!</h2>&#10;<p>Get up to 30% off all beauty products this weekend.</p>&#10;<p><a href='https://yogichem.replit.app/sale'>Shop the sale &rarr;</a></p>"
+                  placeholder="Write your email message here. You can use basic HTML for formatting, e.g.:&#10;&#10;<h2>Big Summer Sale!</h2>&#10;<p>Get up to 30% off all beauty products this weekend.</p>&#10;<p><a href='https://yogichem.co.uk/sale'>Shop the sale &rarr;</a></p>"
                   className={`${inputClass} resize-none font-mono text-xs`}
                 />
                 <p className="text-xs text-gray-400 mt-1">You can use basic HTML. Leave blank for plain text.</p>
@@ -364,7 +364,7 @@ export default function AdminEmailPage() {
               </div>
               <div className="border rounded-lg p-4 bg-white">
                 <div className="bg-[#003DA5] text-white text-center py-4 rounded-t-lg font-bold text-lg mb-4">Yogichem</div>
-                <div className="text-sm" dangerouslySetInnerHTML={{ __html: preview.content }} />
+                <div className="text-sm" dangerouslySetInnerHTML={{ __html: sanitizeCampaignHtml(preview.content || '') }} />
                 <div className="mt-4 pt-4 border-t text-xs text-gray-400 text-center">© {new Date().getFullYear()} Yogichem</div>
               </div>
             </div>

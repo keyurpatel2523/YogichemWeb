@@ -8,7 +8,6 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { formatPrice } from '@/lib/utils';
-import { useAdminStore } from '@/lib/admin-store';
 import { toast } from '@/hooks/use-toast';
 
 const FLAG_MAP: Record<string, string> = {
@@ -20,7 +19,6 @@ const FLAG_MAP: Record<string, string> = {
 };
 
 export default function AdminShippingPage() {
-  const { token } = useAdminStore();
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
@@ -39,7 +37,6 @@ export default function AdminShippingPage() {
     queryKey: ['admin', 'shipping'],
     queryFn: async () => {
       const res = await fetch('/api/admin/shipping', {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (!res.ok) throw new Error('Failed to fetch shipping rules');
       return res.json();
@@ -54,7 +51,6 @@ export default function AdminShippingPage() {
         method,
         headers: {
           'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify(body),
       });
@@ -73,7 +69,6 @@ export default function AdminShippingPage() {
     mutationFn: async (id: number) => {
       const res = await fetch(`/api/admin/shipping?id=${id}`, {
         method: 'DELETE',
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (!res.ok) throw new Error('Failed to delete rule');
       return res.json();

@@ -62,7 +62,7 @@ const statusConfig: Record<string, { icon: any; color: string; label: string }> 
 export default function OrderDetailPage() {
   const router = useRouter();
   const params = useParams();
-  const { token, isAuthenticated } = useUserStore();
+  const { isAuthenticated } = useUserStore();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -76,7 +76,6 @@ export default function OrderDetailPage() {
     const fetchOrder = async () => {
       try {
         const res = await fetch(`/api/orders/${params.id}`, {
-          headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) {
           setError('Order not found');
@@ -92,7 +91,7 @@ export default function OrderDetailPage() {
     };
 
     fetchOrder();
-  }, [isAuthenticated, router, token, params.id]);
+  }, [isAuthenticated, router, params.id]);
 
   if (loading) {
     return (

@@ -8,7 +8,6 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { formatPrice, formatDate } from '@/lib/utils';
-import { useAdminStore } from '@/lib/admin-store';
 import { toast } from '@/hooks/use-toast';
 
 const statusIcons: Record<string, any> = {
@@ -30,7 +29,6 @@ const statusColors: Record<string, string> = {
 export default function AdminOrdersPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const { token } = useAdminStore();
   const queryClient = useQueryClient();
 
   const { data: orders = [], isLoading } = useQuery({
@@ -40,7 +38,6 @@ export default function AdminOrdersPage() {
       if (statusFilter !== 'all') params.set('status', statusFilter);
       params.set('limit', '100');
       const res = await fetch(`/api/admin/orders?${params}`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (!res.ok) throw new Error('Failed to fetch orders');
       return res.json();
@@ -53,7 +50,6 @@ export default function AdminOrdersPage() {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({ orderId, status }),
       });

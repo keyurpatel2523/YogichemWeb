@@ -4,6 +4,8 @@ import { walletTransactions, users } from '@shared/schema';
 import { eq, desc } from 'drizzle-orm';
 import { getUserFromRequest } from '@/lib/auth';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const auth = getUserFromRequest(request);

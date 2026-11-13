@@ -56,10 +56,10 @@ export default function TrackOrderPage() {
             </form>
 
             {searched && (
-              <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg text-center">
-                <Package className="w-8 h-8 text-[#003DA5] mx-auto mb-2" />
-                <p className="font-semibold text-[#1A1A3E]">Order not found</p>
-                <p className="text-sm text-gray-500 mt-1">Please check your order number and email, or sign in to view your orders.</p>
+              <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg text-center">
+                <Package className="w-8 h-8 text-amber-700 mx-auto mb-2" />
+                <p className="font-semibold text-[#1A1A3E]">Tracking is not available</p>
+                <p className="text-sm text-gray-500 mt-1">This form does not look up orders. Sign in to see orders placed on your account.</p>
                 <Link href="/account/orders">
                   <Button variant="outline" size="sm" className="mt-3">View My Orders</Button>
                 </Link>

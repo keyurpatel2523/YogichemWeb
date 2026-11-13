@@ -9,18 +9,16 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { formatPrice } from '@/lib/utils';
-import { useAdminStore } from '@/lib/admin-store';
 import { useToast } from '@/hooks/use-toast';
 
 export default function AdminProductsPage() {
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [deleteId, setDeleteId] = useState<number | null>(null);
-  const { token } = useAdminStore();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+  const authHeaders: Record<string, string> = {};
 
   const { data: products, isLoading } = useQuery({
     queryKey: ['admin', 'products'],

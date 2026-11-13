@@ -1,17 +1,9 @@
+import './load-env';
 import { db } from '../server/db';
-import { categories, products, productImages, promotions, shippingRules, coupons, adminUsers } from '../shared/schema';
-import bcrypt from 'bcryptjs';
+import { categories, products, productImages, promotions, shippingRules, coupons } from '../shared/schema';
 
 async function seed() {
-  console.log('Seeding database...');
-
-  const hashedPassword = await bcrypt.hash('admin123', 10);
-  await db.insert(adminUsers).values({
-    email: 'admin@yogichem.com',
-    password: hashedPassword,
-    name: 'Admin User',
-    role: 'admin',
-  }).onConflictDoNothing();
+  console.log('Seeding catalogue data. This does not create an admin account.');
 
   const categoryData = [
     { name: 'Beauty', slug: 'beauty', description: 'Beauty products and cosmetics', sortOrder: 1 },

@@ -33,9 +33,13 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# uploaded product images stay on disk; production copies go to Vercel Blob
+/public/uploads
+
 # drizzle
 /drizzle
 
 # ide
 .idea
 .vscode
+.neon

@@ -3,6 +3,8 @@ import { db } from '../../../../server/db';
 import { categories } from '@shared/schema';
 import { eq, isNull } from 'drizzle-orm';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const allCategories = await db

@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useAdminStore } from '@/lib/admin-store';
 import { toast } from '@/hooks/use-toast';
 import { ImageUpload } from '@/components/admin/ImageUpload';
 import { CategoryCascadeSelect } from '@/components/admin/CategoryCascadeSelect';
@@ -27,7 +26,6 @@ export default function AdminProductEditPage() {
   const params = useParams();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { token } = useAdminStore();
   const productId = params.id as string;
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -66,22 +64,20 @@ export default function AdminProductEditPage() {
     queryKey: ['admin', 'product', productId],
     queryFn: async () => {
       const res = await fetch(`/api/admin/products/${productId}`, {
-        headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error('Failed to fetch product');
       return res.json();
     },
-    enabled: !!token && !!productId,
+    enabled: !!productId,
   });
 
   // Fetch active suppliers
   useEffect(() => {
-    if (!token) return;
-    fetch('/api/admin/suppliers', { headers: { Authorization: `Bearer ${token}` } })
+        fetch('/api/admin/suppliers')
       .then((res) => res.json())
       .then((data) => setSuppliersList(Array.isArray(data) ? data.filter((s: any) => s.isActive) : []))
       .catch(() => {});
-  }, [token]);
+  }, []);
 
   useEffect(() => {
     if (product) {
@@ -123,7 +119,6 @@ export default function AdminProductEditPage() {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ id: parseInt(productId), ...data }),
       });
@@ -144,7 +139,6 @@ export default function AdminProductEditPage() {
     mutationFn: async () => {
       const res = await fetch(`/api/admin/products?id=${productId}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error('Failed to delete product');
       return res.json();

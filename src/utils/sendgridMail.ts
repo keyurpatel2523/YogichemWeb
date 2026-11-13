@@ -1,10 +1,24 @@
 import sgMail from '@sendgrid/mail';
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY || '');
+interface MailConfig {
+  from: string;
+  admin: string;
+}
 
-export const FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL || 'keyursuhani1530@gmail.com';
+function mailConfig(): MailConfig {
+  const apiKey = process.env.SENDGRID_API_KEY || '';
+  const from = process.env.SENDGRID_FROM_EMAIL || '';
+  if (!apiKey || !from) {
+    throw new Error('Email is not configured. Set SENDGRID_API_KEY and SENDGRID_FROM_EMAIL.');
+  }
+  sgMail.setApiKey(apiKey);
+  return {
+    from,
+    admin: process.env.ADMIN_EMAIL || '',
+  };
+}
+
 export const FROM_NAME = 'Yogichem';
-export const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'keyursuhani1530@gmail.com';
 
 interface MailPayload {
   to: string;
@@ -15,16 +29,17 @@ interface MailPayload {
 }
 
 export async function sendMail({ to, subject, html, text, bccAdmin = false }: MailPayload) {
-  const msg: any = {
+  const config = mailConfig();
+  const msg: sgMail.MailDataRequired = {
     to,
-    from: { email: FROM_EMAIL, name: FROM_NAME },
+    from: { email: config.from, name: FROM_NAME },
     subject,
     html,
     text,
   };
 
-  if (bccAdmin && ADMIN_EMAIL && ADMIN_EMAIL !== to) {
-    msg.bcc = ADMIN_EMAIL;
+  if (bccAdmin && config.admin && config.admin !== to) {
+    msg.bcc = config.admin;
   }
 
   await sgMail.send(msg);

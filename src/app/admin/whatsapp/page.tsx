@@ -9,7 +9,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useAdminStore } from '@/lib/admin-store';
 
 const STATUS_COLORS: Record<string, string> = {
   sent: 'bg-green-100 text-green-700 border-green-200',
@@ -25,7 +24,6 @@ const emptyForm = {
 };
 
 export default function AdminWhatsAppPage() {
-  const { token } = useAdminStore();
   const queryClient = useQueryClient();
 
   const [showModal, setShowModal] = useState(false);
@@ -36,7 +34,7 @@ export default function AdminWhatsAppPage() {
   const [preview, setPreview] = useState<any | null>(null);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
 
-  const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+  const authHeaders: Record<string, string> = {};
 
   const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
     setToast({ msg, type });
@@ -73,11 +71,12 @@ export default function AdminWhatsAppPage() {
           scheduledAt: form.scheduleType === 'later' ? form.scheduledAt : null,
         }),
       });
-      if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'Failed'); }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed');
       await queryClient.invalidateQueries({ queryKey: ['admin', 'whatsapp-broadcasts'] });
       setShowModal(false);
       setForm(emptyForm);
-      showToast(sendNow ? 'Broadcast saved as sent!' : form.scheduleType === 'later' ? 'Broadcast scheduled!' : 'Broadcast saved as draft');
+      showToast(data.warning || 'Broadcast saved as a draft');
     } catch (err: any) {
       showToast(err.message || 'Failed to save broadcast', 'error');
     } finally {
@@ -260,7 +259,7 @@ export default function AdminWhatsAppPage() {
                   onChange={(e) => setForm({ ...form, message: e.target.value })}
                   rows={5}
                   maxLength={1600}
-                  placeholder="Hi {first_name}! 👋 Yogichem here. Our summer sale is now on — up to 30% off! Shop now: https://yogichem.replit.app/sale"
+                  placeholder="Hi {first_name}! 👋 Yogichem here. Our summer sale is now on — up to 30% off! Shop now: https://yogichem.co.uk/sale"
                   className={`${inputClass} resize-none`}
                 />
                 <div className="flex justify-between items-center mt-1">
